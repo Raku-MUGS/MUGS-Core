@@ -1,0 +1,6 @@
+use Test;
+use MUGS::Core;
+
+pass "replace me";
+
+done-testing;
