@@ -1,2 +1,17 @@
+# Caches
 .precomp/
+node_modules/
+
+# Packages
 /MUGS-Core-*
+
+# Backup files
+*~
+
+# IDE files
+/.idea
+*.iml
+
+# Generated files
+/docs/*/*.html
+/docs/*/*.dot.svg
