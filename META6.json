@@ -5,6 +5,15 @@
   "build-depends": [
   ],
   "depends": [
+    "Cro::WebSocket",
+    "Crypt::SodiumPasswordHash",
+    "DBIish",
+    "JSON::Fast",
+    "Log::Timeline",
+    "Pluggable",
+    "Red",
+    "Temp::Path",
+    "YAMLish"
   ],
   "description": "Core modules for MUGS (Multi-User Gaming Services)",
   "license": "Artistic-2.0",
@@ -46,11 +55,16 @@
     "MUGS::Util::StructureValidator": "lib/MUGS/Util/StructureValidator.rakumod"
   },
   "resources": [
+    "conf/user-defaults.yaml",
+    "fake-tls/ca-crt.pem",
+    "fake-tls/server-crt.pem",
+    "fake-tls/server-key.pem"
   ],
   "source-url": "https://github.com/Raku-MUGS/MUGS-Core.git",
   "tags": [
   ],
   "test-depends": [
+    "Temp::Path"
   ],
   "version": "0.0.3"
 }
