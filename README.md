@@ -14,12 +14,12 @@ SYNOPSIS
     git clone git@github.com:Raku-MUGS/MUGS-Core.git
     cd MUGS-Core
     zef install --deps-only .
-    mugs-admin create-universe
+    raku -Ilib bin/mugs-admin create-universe
 
 DESCRIPTION
 ===========
 
-**NOTE: See [the top-level MUGS repo](https://github.com/Raku-MUGS/MUGS) for more info.**
+**NOTE: See the [top-level MUGS repo](https://github.com/Raku-MUGS/MUGS) for more info.**
 
 MUGS-Core is the core of MUGS (Multi-User Gaming Services), a Raku-based platform for game service development. In other words, it is a set of basic services written in the Raku language for creating client-server and multi-user games. It abstracts away the boilerplate of managing player identities, tracking active games and sessions, sending and receiving messages and actions, and so forth.
 
