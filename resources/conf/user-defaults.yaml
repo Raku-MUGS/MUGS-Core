@@ -1,0 +1,22 @@
+# ABSTRACT: Defaults for user configuration
+# NOTE: Keys are case-sensitive!
+Servers:
+  # The default server if none is requested by the user
+  DEFAULT: internal
+  # An internal stub server for local play
+  internal:
+    url:  ''
+    user: default-user
+    pass: ''
+  # The default localhost URL for a websocket server
+  local-test:
+    url:  'wss://localhost:10000/mugs-ws'
+UI:
+  # Common settings for all UIs
+  Common:
+     # 80% of accessibility is good universal design that works for everyone;
+     # this is about enabling the last 20% of tuning that requires tradeoffs
+     tune-for-screen-reader: false
+  CLI:
+     # Use ANSI attributes (bold etc.) and colors (both 16-color and 256-color)
+     color: true
