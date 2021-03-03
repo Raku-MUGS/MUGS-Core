@@ -1,0 +1,47 @@
+use Test;
+
+use MUGS::Core;
+
+
+plan 19;
+
+
+# Global types and enums
+my GameID    $game-id;
+my Status    $status;
+my GameState $game-state;
+my WinLoss   $win-loss;
+
+pass "able to declare variables of global types/enums";
+
+$game-id = 42;
+pass "able to assign an integer GameID";
+
+for < Success RequestError ResponseError ServerError > {
+    ok Status::{$_}:exists, "$_ is a known Status";
+}
+
+for < NotStarted Paused InProgress Finished Abandoned > {
+    ok GameState::{$_}:exists, "$_ is a known GameState";
+}
+
+for < Undecided Loss Tie Win Ranked > {
+    ok WinLoss::{$_}:exists, "$_ is a known WinLoss state";
+}
+
+
+# Thread-safe ID generation
+my $total = 1000;
+my @ids   = ^$total .hyper.map({ NEXT-ID });
+my $count = @ids.sort.unique.elems;
+is $total, $count, "NEXT-ID produces unique IDs across threads";
+
+
+# Exception base
+isa-ok X::MUGS, Exception, "X::MUGS is an Exception subclass";
+
+class X::MUGS::Test is X::MUGS { }
+pass "able to declare an X::MUGS subclass";
+
+
+done-testing;

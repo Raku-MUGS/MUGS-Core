@@ -1,0 +1,63 @@
+use v6.d;
+use Test;
+
+
+### CORE MODULES
+
+use MUGS::Core;
+use MUGS::Util::StructureValidator;
+use MUGS::Util::File;
+use MUGS::Util::Config;
+use MUGS::Util::ImplementationRegistry;
+
+use MUGS::Message;
+use MUGS::Connection;
+use MUGS::Client;
+use MUGS::Identity;
+use MUGS::Authentication;
+
+use MUGS::Server::Storage::Identities;
+use MUGS::Server::Storage::Credentials;
+
+use MUGS::Server::LogTimelineSchema;
+use MUGS::Server;
+
+use MUGS::Server::Storage::Driver::Fake::Identities;
+use MUGS::Server::Storage::Driver::Fake::Credentials;
+use MUGS::Server::Storage::Driver::Fake;
+use MUGS::Server::Storage::Driver::Red::SQLite::IdentitySchema;
+use MUGS::Server::Storage::Driver::Red::SQLite;
+
+use MUGS::Universe;
+use MUGS::Server::Universe;
+use MUGS::Server::Stub;
+
+use MUGS::Server::Connection::Supplier;
+use MUGS::Client::Connection::Supplier;
+use MUGS::Server::Connection::WebSocket;
+use MUGS::Client::Connection::WebSocket;
+
+use MUGS::App::WebSocketServer::Routes;
+use MUGS::App::WebSocketServer Empty;
+
+use MUGS::UI;
+use MUGS::App::LocalUI;
+use MUGS::App::DevTool Empty;
+use MUGS::App::Admin Empty;
+
+
+### CORE "GAMES"
+
+use MUGS::Server::Game::Lobby;
+use MUGS::Server::Genre::Test;
+use MUGS::Server::Game::Echo;
+
+use MUGS::Client::Game::Lobby;
+use MUGS::Client::Genre::Test;
+use MUGS::Client::Game::Echo;
+
+
+pass "all modules loaded successfully";
+
+
+done-testing;

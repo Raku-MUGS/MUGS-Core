@@ -1,0 +1,170 @@
+use Test;
+use Temp::Path;
+
+use MUGS::Util::File;
+
+
+plan 55;
+
+
+# Check correct exception subclassing
+isa-ok X::MUGS::File, X::MUGS, "X::MUGS::File is an X::MUGS subclass";
+isa-ok $_, X::MUGS::File, "$_.^name() is an X::MUGS::File subclass"
+    for X::MUGS::File::Unspecified, X::MUGS::File::Missing,
+        X::MUGS::File::Unreadable,  X::MUGS::File::Unparseable,
+        X::MUGS::File::Unwritable,  X::MUGS::File::DirUnwritable;
+
+# Set up a temporary directory for all of the following
+temp $*TMPDIR = my $base-dir = make-temp-dir :chmod(0o700);
+
+
+### ensure-readable/ensure-writable
+
+# Undefined/empty filename
+throws-like { ensure-readable 'empty', Str }, X::MUGS::File::Unspecified,
+            "ensure-readable throws on undefined filename";
+throws-like { ensure-readable 'empty', ''  }, X::MUGS::File::Unspecified,
+            "ensure-readable throws on empty filename";
+throws-like { ensure-writable 'empty', Str }, X::MUGS::File::Unspecified,
+            "ensure-writable throws on undefined filename";
+throws-like { ensure-writable 'empty', ''  }, X::MUGS::File::Unspecified,
+            "ensure-writable throws on empty filename";
+
+throws-like { ensure-readable 'empty', Str, :$base-dir }, X::MUGS::File::Unspecified,
+            "ensure-readable throws on undefined filename even with valid base-dir";
+throws-like { ensure-readable 'empty', '',  :$base-dir }, X::MUGS::File::Unspecified,
+            "ensure-readable throws on empty filename even with valid base-dir";
+throws-like { ensure-writable 'empty', Str, :$base-dir }, X::MUGS::File::Unspecified,
+            "ensure-writable throws on undefined filename even with valid base-dir";
+throws-like { ensure-writable 'empty', '',  :$base-dir }, X::MUGS::File::Unspecified,
+            "ensure-writable throws on empty filename even with valid base-dir";
+
+# File does not exist
+throws-like { ensure-readable 'missing', 'DoEsNoTeXiSt' },
+            X::MUGS::File::Missing,
+            "ensure-readable throws on missing file";
+throws-like { ensure-readable 'missing', 'DoEsNoTeXiSt', :$base-dir },
+            X::MUGS::File::Missing,
+            "ensure-readable throws on missing file even with valid base-dir";
+
+# File is unreadable
+my $unreadable = make-temp-path :chmod(0o333);
+throws-like { ensure-readable 'unreadable', $unreadable },
+            X::MUGS::File::Unreadable,
+            "ensure-readable throws on unreadable file";
+throws-like { ensure-readable 'unreadable', $unreadable, :$base-dir },
+            X::MUGS::File::Unreadable,
+            "ensure-readable throws on missing file even with valid base-dir";
+
+# File is readable
+my $readable = make-temp-path :chmod(0o444);
+lives-ok { ensure-readable 'readable', $readable },
+         "ensure-readable lives with a readable file";
+lives-ok { ensure-readable 'readable', $readable, :$base-dir },
+         "ensure-readable lives with a readable file in a valid base-dir";
+
+# File is unwritable
+my $unwritable = make-temp-path :chmod(0o555);
+throws-like { ensure-writable 'unwritable', $unwritable },
+            X::MUGS::File::Unwritable,
+            "ensure-writable throws on unwritable file";
+throws-like { ensure-writable 'unwritable', $unwritable, :$base-dir },
+            X::MUGS::File::Unwritable,
+            "ensure-writable throws on unwritable file even with a valid base-dir";
+
+# File missing and dir is unwritable
+my $dir = make-temp-dir :chmod(0o555);
+throws-like { ensure-writable 'dir unwritable', "$dir/DoEsNoTeXiSt" },
+            X::MUGS::File::DirUnwritable,
+            "ensure-writable throws on missing file with unwritable dir";
+throws-like { ensure-writable 'dir unwritable', 'DoEsNoTeXiSt', :base-dir($dir) },
+            X::MUGS::File::DirUnwritable,
+            "ensure-writable throws on missing file with unwritable dir even with a valid base-dir";
+
+# File missing and dir is writable
+lives-ok { ensure-writable 'dir writable', 'DoEsNoTeXiSt' },
+         "ensure-writable lives on missing file with writable dir";
+lives-ok { ensure-writable 'dir writable', 'DoEsNoTeXiSt', :$base-dir },
+         "ensure-writable lives on missing file with writable base-dir";
+
+# File is writable
+my $writable = make-temp-path :chmod(0o222);
+lives-ok { ensure-writable 'writable', $writable },
+         "ensure-writable lives on writable file";
+lives-ok { ensure-writable 'writable', $writable, :$base-dir },
+         "ensure-writable lives on writable file with valid base-dir";
+
+
+### load-yaml-file
+
+sub load-variants-throw-like($type, $file, $exception) {
+    my $desc = "load-yaml-file throws on $type file";
+
+    throws-like { load-yaml-file($type, $file) },
+                $exception, $desc;
+    throws-like { load-yaml-file($type, $file, :all) },
+                $exception, "$desc with :all";
+    throws-like { load-yaml-file($type, $file, :$base-dir) },
+                $exception, "$desc with valid base-dir";
+    throws-like { load-yaml-file($type, $file, :all, :$base-dir) },
+                $exception, "$desc with :all and valid base-dir";
+}
+
+# File missing or unreadable
+load-variants-throw-like('missing', 'DoEsNoTeXiSt', X::MUGS::File::Missing);
+load-variants-throw-like('unreadable', $unreadable, X::MUGS::File::Unreadable);
+
+# File is unparseable
+my $valid-doc = q:to/YAML/;
+    ---
+    foo: bar
+    baz: 123
+    quux: [ 6, 7, 8 ]
+    YAML
+my $invalid = buf8.new(^256).decode('latin-1');
+my $unparseable-single  = make-temp-path :chmod(0o777) :content($invalid);
+my $unparseable-leader  = make-temp-path :chmod(0o777) :content($invalid ~ $valid-doc);
+my $unparseable-trailer = make-temp-path :chmod(0o777) :content($valid-doc ~ "...\n" ~ $invalid);
+
+load-variants-throw-like('unparseable',        $unparseable-single, X::MUGS::File::Unparseable);
+load-variants-throw-like('unparseable-leader', $unparseable-leader, X::MUGS::File::Unparseable);
+
+# XXXX: It's not clear if loading just a single parseable leading doc from an
+#       otherwise invalid file *should* work (using YAMLish it doesn't as of
+#       January 2021).  For now don't constrain that behavior either way.
+#       Trying to load the entire file should still fail though, so test that.
+
+throws-like { load-yaml-file 'unparseable-trailer', $unparseable-trailer, :all },
+            X::MUGS::File::Unparseable,
+            "load-yaml-file throws on unparseable trailer file with :all";
+throws-like { load-yaml-file 'unparseable-trailer', $unparseable-trailer, :all, :$base-dir },
+            X::MUGS::File::Unparseable,
+            "load-yaml-file throws on unparseable trailer file with :all and valid base-dir";
+
+# File is parseable
+my $expected     = { :foo<bar>, :baz(123), :quux[6,7,8] };
+my $valid-single = make-temp-path :chmod(0o777) :content($valid-doc);
+my $valid-double = make-temp-path :chmod(0o777) :content($valid-doc ~ $valid-doc);
+
+is load-yaml-file('valid-single', $valid-single), $expected,
+   'load-yaml-file loads a single valid doc correctly';
+is load-yaml-file('valid-single', $valid-single, :all), ($expected,),
+   'load-yaml-file loads a single valid doc correctly even with :all';
+is load-yaml-file('valid-single', $valid-single, :$base-dir), $expected,
+   'load-yaml-file loads a single valid doc correctly with a valid base-dir';
+is load-yaml-file('valid-single', $valid-single, :all, :$base-dir), ($expected,),
+   'load-yaml-file loads a single valid doc correctly even with :all and a valid-base-dir';
+
+is load-yaml-file('valid-double', $valid-double), $expected,
+   'load-yaml-file loads the first doc in a longer file correctly';
+is load-yaml-file('valid-double', $valid-double, :all), ($expected, $expected),
+   'load-yaml-file loads both docs in a longer file correctly with :all';
+is load-yaml-file('valid-double', $valid-double, :$base-dir), $expected,
+   'load-yaml-file loads the first doc in a longer file correctly with a valid base-dir';
+is load-yaml-file('valid-double', $valid-double, :all, :$base-dir), ($expected, $expected),
+   'load-yaml-file loads both docs in a longer file correctly with :all and a valid base-dir';
+
+
+### write-yaml-file
+
+# XXXX: HERE

@@ -1,0 +1,197 @@
+use Test;
+
+use MUGS::Util::StructureValidator;
+
+
+plan 86;
+
+
+# Check correct exception subclassing
+isa-ok X::MUGS::InvalidStructure, X::MUGS, "X::MUGS::InvalidStructure is an X::MUGS subclass";
+
+
+# Helpers for valid and invalid checks
+sub expect-valid($data, $schema, $desc) {
+    lives-ok { validate-structure('test', $data, $schema) }, $desc;
+}
+
+sub expect-invalid($data, $schema, $desc) {
+    throws-like { validate-structure('test', $data, $schema) },
+                X::MUGS::InvalidStructure, $desc;
+}
+
+
+# Basic types
+expect-valid $_, $_, "type object for {.^name} checks against itself"
+    for Any, Int, Num, Rat, Str;
+
+expect-invalid .key, .value, "type object for {.key.^name} doesn't typecheck for definedness"
+    for (Any) => Any:D, (Int) => Int:D, (Num) => Num:D, (Rat) => Rat:D, (Str) => Str:D;
+
+expect-valid .key, .value, "concrete value typechecks against {.value.^name}"
+    for (42) => Int, (3e0) => Num, (5.6) => Rat, ('foo') => Str,
+        (42) => Any, (3e0) => Any, (5.6) => Any, ('foo') => Any;
+
+expect-valid .key, .value, "concrete value typechecks against {.value.^name}"
+    for (42) => Int:D, (3e0) => Num:D, (5.6) => Rat:D, ('foo') => Str:D,
+        (42) => Any:D, (3e0) => Any:D, (5.6) => Any:D, ('foo') => Any:D;
+
+expect-invalid .key, .value, "concrete value with wrong type fails typecheck against {.value.^name}"
+    for (3e0) => Int, (42) => Num, ('foo') => Rat, (5.6) => Str;
+
+expect-invalid .key, .value, "concrete value with wrong type fails typecheck against {.value.^name}"
+    for (3e0) => Int:D, (42) => Num:D, ('foo') => Rat:D, (5.6) => Str:D;
+
+
+# Simple arrays
+expect-valid [ Int, 5,   10  ], [ Int   ], "array of Int values matches [ Int ]";
+expect-valid [ Num, 1e1, 2e1 ], [ Num   ], "array of Num values matches [ Num ]";
+expect-valid [ Rat, 2.3, 3.4 ], [ Rat   ], "array of Rat values matches [ Rat ]";
+expect-valid [ Str, 'a', 'b' ], [ Str   ], "array of Str values matches [ Str ]";
+
+expect-valid [   2, 5,   10  ], [ Int:D ], "array of defined Int values matches [ Int:D ]";
+expect-valid [ 7e0, 1e1, 2e1 ], [ Num:D ], "array of defined Num values matches [ Num:D ]";
+expect-valid [ 1.2, 2.3, 3.4 ], [ Rat:D ], "array of defined Rat values matches [ Rat:D ]";
+expect-valid [ 'z', 'a', 'b' ], [ Str:D ], "array of defined Str values matches [ Str:D ]";
+
+expect-valid [ Any, Int, Num, Rat, Str], [ Any ], "Array of mixed type objects matches [ Any ]";
+expect-valid [ 77, 5e5, 3.14, 'quux'], [ Any:D ], "Array of mixed concrete values matches [ Any:D ]";
+
+expect-invalid [ Num, 5,   10  ], [ Int   ], "array with one invalid type object does not match [ Int ]";
+expect-invalid [ 1e1, Str, 2e1 ], [ Num   ], "array with one invalid type object does not match [ Num ]";
+expect-invalid [ 2.3, 3.4, Int ], [ Rat   ], "array with one invalid type object does not match [ Rat ]";
+expect-invalid [ Rat, 'a', 'b' ], [ Str   ], "array with one invalid type object does not match [ Str ]";
+
+expect-invalid [ 8e8, 5,   10  ], [ Int:D ], "array with one invalid concrete object does not match [ Int:D ]";
+expect-invalid [ 1e1, 'd', 2e1 ], [ Num:D ], "array with one invalid concrete object does not match [ Num:D ]";
+expect-invalid [ 2.3, 3.4, 12  ], [ Rat:D ], "array with one invalid concrete object does not match [ Rat:D ]";
+expect-invalid [ 7.8, 'a', 'b' ], [ Str:D ], "array with one invalid concrete object does not match [ Str:D ]";
+
+# XXXX: Future possible functionality
+# expect-valid [ Int, 55,    Num, 2e1,   Rat, 4.5,   Str, 'bar' ],
+#              [ Int, Int:D, Num, Num:D, Rat, Rat:D, Str, Str:D ],
+#              "array of values matches array of correct types";
+
+
+# Simple hashes
+expect-valid { }, { }, "empty hash matches empty hash";
+
+expect-valid { i => Int, n => Num, r => Rat, s => Str },
+             { i => Int, n => Num, r => Rat, s => Str },
+             "type object-valued hash matches itself";
+expect-valid { i => Int, n => Num, r => Rat, s => Str },
+             { i => Any, n => Any, r => Any, s => Any },
+             "type object-valued hash matches Any slots";
+expect-valid { i => 137, n => 4e4, r => 8.9, s => 'e' },
+             { i => Int, n => Num, r => Rat, s => Str },
+             "concrete object-valued hash matches type object-valued hash";
+expect-valid { i => 137,   n => 4e4,   r => 8.9,   s => 'e'   },
+             { i => Int:D, n => Num:D, r => Rat:D, s => Str:D },
+             "concrete object-valued hash matches defined-valued hash";
+expect-valid { i => 137, n => 4e4, r => 8.9, s => 'e' },
+             { i => Any, n => Any, r => Any, s => Any },
+             "concrete object-valued hash matches Any-valued hash";
+expect-valid { i => 137,   n => 4e4,   r => 8.9,   s => 'e'   },
+             { i => Any:D, n => Any:D, r => Any:D, s => Any:D },
+             "concrete object-valued hash matches Any:D-valued hash";
+
+expect-invalid { i => Int,   n => Num,   r => Rat,   s => Str   },
+               { i => Int:D, n => Num:D, r => Rat:D, s => Str:D },
+               "type object-valued hash does not match defined values";
+expect-invalid { i => Int,   n => Num,   r => Rat,   s => Str   },
+               { i => Any:D, n => Any:D, r => Any:D, s => Any:D },
+               "type object-valued hash does not match Any:D values";
+
+expect-invalid { i => 137,   n => 4e4,   r => 8.9 },
+               { i => Int:D, n => Num:D, r => Rat:D, s => Str:D },
+               "hash missing one key does not match";
+expect-invalid { i => 137,   n => 4e4,   r => 8.9,   q => 'q'   },
+               { i => Int:D, n => Num:D, r => Rat:D, s => Str:D },
+               "hash with a misspelled key does not match";
+expect-invalid { },
+               { i => Int:D, n => Num:D, r => Rat:D, s => Str:D },
+               "empty hash does not match non-empty hash";
+
+# XXXX: Are extra keys a problem? --> For now, don't spec a behavior.
+
+
+# Optional hash keys
+expect-valid { }, { i => Int but Optional, n => Num but Optional,
+                    r => Rat but Optional, s => Str but Optional },
+                  "empty hash matches schema with all Optional values";
+expect-valid { i => 137,   n => 4e4,   r => 8.9,   s => 'z' },
+             { i => Int but Optional, n => Num but Optional,
+               r => Rat but Optional, s => Str but Optional },
+             "hash with all keys matches even if all are Optional";
+expect-valid { i => 137,   n => 4e4,   r => 8.9,   s => 'z' },
+             { i => Int:D, n => Num:D, r => Rat:D, s => Str but Optional },
+             "hash with all keys matches even when one is Optional";
+expect-valid { i => 137,   n => 4e4,   r => 8.9 },
+             { i => Int:D, n => Num:D, r => Rat:D, s => Str but Optional },
+             "hash missing one key matches if that key is Optional";
+expect-invalid { i => 137,   n => 4e4,   r => 8.9 },
+               { i => Int:D, n => Num:D, r => Rat but Optional, s => Str:D },
+               "hash missing one key does not match if a different key is Optional";
+
+# Optional key => array
+expect-valid { }, { i => [ Int ] but Optional, n => [ Num ] but Optional,
+                    r => [ Rat ] but Optional, s => [ Str ] but Optional },
+                  "empty hash matches schema with all Optional arrays";
+expect-valid { i => [ 137 ],   n => [ 4e4 ],   r => [ 8.9 ],   s => [ 'z' ] },
+             { i => [ Int ] but Optional, n => [ Num ] but Optional,
+               r => [ Rat ] but Optional, s => [ Str ] but Optional },
+             "hash with all keys matches even if all are Optional arrays";
+expect-valid { i => 137,   n => 4e4,   r => 8.9,   s => [ 'z' ] },
+             { i => Int:D, n => Num:D, r => Rat:D, s => [ Str ] but Optional },
+             "hash with all keys matches even when one is an Optional array";
+expect-valid { i => 137,   n => 4e4,   r => 8.9 },
+             { i => Int:D, n => Num:D, r => Rat:D, s => [ Str ] but Optional },
+             "hash missing one key matches if that key is an Optional array";
+expect-invalid { i => 137,   n => 4e4,   r => [ 8.9 ] },
+               { i => Int:D, n => Num:D, r => [ Rat ] but Optional, s => Str:D },
+               "hash missing one key does not match if a different key is an Optional array";
+
+# Optional key => hash
+expect-valid { }, { i => { a => Int } but Optional, n => { b => Num } but Optional,
+                    r => { c => Rat } but Optional, s => { d => Str } but Optional },
+                  "empty hash matches schema with all Optional subhashes";
+expect-valid { i => { a => 137 }, n => { b => 4e4 }, r => { c => 8.9 }, s => { d => 'z' } },
+             { i => { a => Int } but Optional, n => { b => Num } but Optional,
+               r => { c => Rat } but Optional, s => { d => Str } but Optional },
+             "hash with all keys matches even if all are Optional subhashes";
+expect-valid { i => 137,   n => 4e4,   r => { q => 8.9 }, s => 'z' },
+             { i => Int:D, n => Num:D, r => { q => Rat:D } but Optional, s => Str },
+             "hash with all keys matches even when one is an Optional subhash";
+expect-valid { i => 137,   n => 4e4,   s => 'z' },
+             { i => Int:D, n => Num:D, r => { q => Rat:D } but Optional, s => Str },
+             "hash missing one key matches if that key is an Optional subhash";
+expect-invalid { i => 137,   n => 4e4,   r => { q => 8.9 } },
+               { i => Int:D, n => Num:D, r => { q => Rat } but Optional, s => Str:D },
+               "hash missing one key does not match if a different key is an Optional subhash";
+
+
+# Complex structures
+expect-valid { a => [ 5, 6, 7 ] },
+             { a => [ Int:D   ] },
+             "array inside matching hash matches";
+expect-valid [ { foo => 'a' }, { foo => 'b' } ],
+             [ { foo => Str } ],
+             "hash inside matching array matches";
+
+expect-invalid { a => [ 1.2, 3.4 ] },
+               { a => [ Int:D    ] },
+               "wrongly-typed array inside hash does not match";
+expect-invalid [ { foo => 'a' }, { foo => 'b' } ],
+               [ { foo => Num } ],
+               "wrongly-typed hash inside array does not match";
+
+expect-valid { foo => [ { bar => [ 1, 2, 3 ] }, { bar => [ 5, 6, 7 ] } ] },
+             { foo => [ { bar => [ Int:D ] } ] },
+             "HoAoHoA matches";
+
+expect-invalid { foo => [ { bar => [ 1, 2, 3 ] }, { bar => [ 5, 6e0, 7 ] } ] },
+               { foo => [ { bar => [ Int:D ] } ] },
+               "HoAoHoA with one wrong value at lowest level does not match";
+
+
+done-testing;
