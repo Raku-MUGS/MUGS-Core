@@ -6,7 +6,7 @@
   ],
   "depends": [
   ],
-  "description": "blah blah blah",
+  "description": "Core modules for MUGS (Multi-User Gaming Services)",
   "license": "Artistic-2.0",
   "name": "MUGS::Core",
   "perl": "6.d",
@@ -15,10 +15,10 @@
   },
   "resources": [
   ],
-  "source-url": "",
+  "source-url": "https://github.com/Raku-MUGS/MUGS-Core.git",
   "tags": [
   ],
   "test-depends": [
   ],
-  "version": "0.0.1"
+  "version": "0.0.3"
 }
