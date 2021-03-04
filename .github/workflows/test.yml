@@ -24,6 +24,8 @@ jobs:
       - uses: Raku/setup-raku@v1
         with:
           raku-version: ${{ matrix.raku-version }}
+      - name: Update Zef Indices
+        run: zef update
       - name: Install Dependencies
         run: zef install --/test --test-depends --deps-only --exclude="pq:ver<5>:from<native>" .
       - name: Install App::Prove6
