@@ -3,6 +3,7 @@
 node_modules/
 
 # Packages
+/sdist/
 /MUGS-Core-*
 
 # Backup files
