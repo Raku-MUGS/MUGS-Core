@@ -1,0 +1,22 @@
+# Caches
+**/.precomp
+**/node_modules
+
+# Packages
+/sdist
+/MUGS-Core-*
+
+# Backup files
+**/*~
+
+# IDE files
+/.idea
+*.iml
+
+# Generated files
+/docs/*/*.html
+/docs/*/*.dot.svg
+
+# Git/GitHub trees
+/.git
+/.github
