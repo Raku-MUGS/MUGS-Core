@@ -1,0 +1,15 @@
+---
+cro:        1
+id:         mugs-websocket
+name:       "MUGS WebSocket Server"
+entrypoint: "bin/mugs-ws-server"
+endpoints: 
+  - 
+    id:       wss
+    name:     WSS
+    protocol: https
+    host-env: MUGS_WEBSOCKET_HOST
+    port-env: MUGS_WEBSOCKET_PORT
+links:  []
+env:    []
+...
