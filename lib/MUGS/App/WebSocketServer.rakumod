@@ -26,6 +26,13 @@ sub create-websocket-server(:$application!, Str:D :$host!, UInt:D :$port!,
 }
 
 
+#| Convenience method to flush a single message to $*OUT without autoflush
+sub put-flushed(Str:D $message) {
+    put $message;
+    $*OUT.flush;
+}
+
+
 #| Launch a WebSocket MUGS server listening on host:port
 sub MAIN( Str:D :$universe = %*ENV<MUGS_WEBSOCKET_UNIVERSE> || 'default',
           Str:D :$host = %*ENV<MUGS_WEBSOCKET_HOST> || 'localhost',
@@ -39,16 +46,16 @@ sub MAIN( Str:D :$universe = %*ENV<MUGS_WEBSOCKET_UNIVERSE> || 'default',
          Bool:D :$secure = True, Bool:D :$debug = True) is export {
 
     $PROCESS::DEBUG = $debug;
-    put "Using {$universe ?? "universe '$universe'" !! 'internal stub universe'}.";
+    put-flushed "Using {$universe ?? "universe '$universe'" !! 'internal stub universe'}.";
     my $mugs-server = $universe ?? create-universe-mugs-server($universe)
                                 !! create-stub-mugs-server;
 
-    put 'Loading games.';
+    put-flushed 'Loading games.';
     $mugs-server.load-game-plugins;
     my @loaded = $mugs-server.known-implementations.sort;
-    put "Loaded: @loaded[]";
+    put-flushed "Loaded: @loaded[]";
 
-    put 'Starting WebSocket server.';
+    put-flushed 'Starting WebSocket server.';
     my $application = routes(:$mugs-server);
     my $ws-server   = create-websocket-server(:$application, :$host, :$port,
                                               :$secure, :$private-key-file,
@@ -57,10 +64,11 @@ sub MAIN( Str:D :$universe = %*ENV<MUGS_WEBSOCKET_UNIVERSE> || 'default',
     $ws-server.start;
     my $root = $application.handlers[0].implementation.signature.params[0].constraint_list[0];
     my $url  = "ws{'s' if $secure}://$host:$port/$root";
-    put "Listening at $url";
+    put-flushed "Listening at $url";
+
     react {
         whenever signal(SIGINT) {
-            put 'Shutting down.';
+            put-flushed 'Shutting down.';
             $ws-server.stop;
             done;
         }
