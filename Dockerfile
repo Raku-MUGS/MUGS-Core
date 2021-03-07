@@ -40,10 +40,14 @@ RUN zef install --deps-only --exclude="pq:ver<5>:from<native>" . \
 
 USER raku:raku
 
-RUN raku -Ilib bin/mugs-admin create-universe
+RUN zef install .
+
+ENV PATH=/home/raku/.raku/bin:$PATH
+
+RUN mugs-admin create-universe
 
 ENV MUGS_WEBSOCKET_HOST="0.0.0.0"
 ENV MUGS_WEBSOCKET_PORT="10000"
 EXPOSE 10000
 
-ENTRYPOINT ["raku", "-Ilib", "bin/mugs-ws-server"]
+ENTRYPOINT ["mugs-ws-server"]
