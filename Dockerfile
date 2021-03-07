@@ -1,5 +1,9 @@
-FROM rakudo-star:2020.10
-MAINTAINER Geoffrey Broadwell
+ARG rakudo_version=2020.10
+FROM rakudo-star:$rakudo_version
+ARG rakudo_version
+
+LABEL maintainer="Geoffrey Broadwell"
+LABEL org.opencontainers.image.source=https://github.com/Raku-MUGS/MUGS-Core
 
 RUN mkdir /home/raku \
  && chmod 700 /home/raku \
