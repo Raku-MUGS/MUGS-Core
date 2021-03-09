@@ -1,4 +1,11 @@
 Revision history for MUGS-Core
 
 {{$NEXT}}
-    - Initial version
+
+0.0.4 *WIP*
+  - Support Docker builds
+  - Support `cro run`
+  - Flush WebSocketServer startup messages immediately
+
+0.0.3 2021-03-04
+  - First public upload
