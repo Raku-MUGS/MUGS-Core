@@ -448,9 +448,13 @@ class MUGS::Server::Game {
     }
 
     method maybe-start-game(::?CLASS:D:) {
-        if $!gamestate == NotStarted {
-            self.set-gamestate(InProgress);
-        }
+        self.start-game
+            if $!gamestate == NotStarted
+            && %.participant.elems >= %.config<start-players>;
+    }
+
+    method start-game(::?CLASS:D:) {
+        self.set-gamestate(InProgress);
     }
 
     method remove-character(::?CLASS:D: MUGS::Character:D $character) {
@@ -459,6 +463,18 @@ class MUGS::Server::Game {
 
         my %data = new-count => %!participant.elems;
         self.add-event(CharacterLeft, :$character, :%data);
+
+        self.maybe-stop-game;
+    }
+
+    method maybe-stop-game(::?CLASS:D:) {
+        self.stop-game(Abandoned)
+            if $!gamestate < Finished
+            && %.participant.elems < %.config<min-players>;
+    }
+
+    method stop-game(::?CLASS:D: GameState $new-state) {
+        self.set-gamestate($new-state);
     }
 
     method participants(::?CLASS:D:) {
