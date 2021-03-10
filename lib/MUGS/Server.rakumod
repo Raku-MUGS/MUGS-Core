@@ -838,13 +838,13 @@ class MUGS::Server
             my $game-desc    = $impl.game-desc;
             my @genre-tags   = $impl.genre-tags;
             my @content-tags = $impl.content-tags;
-            my $config-form  = $impl.config-form.map: {
+            my @config-form  = $impl.config-form.map: {
                 my %field    = .< field section desc default visible-locally >:kv;
                 %field<type> = .<type>.^name;
                 %field
             };
 
-            hash(game-type => $_, :$game-desc, :@genre-tags, :@content-tags, :$config-form)
+            hash(game-type => $_, :$game-desc, :@genre-tags, :@content-tags, :@config-form)
         }
     }
 
