@@ -4,6 +4,7 @@ use MUGS::Message;
 use MUGS::Connection;
 
 use Cro::WebSocket::Client;
+use JSON::Fast;
 
 
 #| A WebSocket Connection to an independent MUGS server
@@ -26,14 +27,15 @@ class MUGS::Client::Connection::WebSocket does MUGS::Client::Connection {
     }
 
     method send-to-server(MUGS::Message:D $message) {
-        put "client --> SERVER:\n{$message.to-struct.raku.indent(4)}\n" if $!debug;
-        $!server-conn.send($message.to-struct);
+        my $struct = $message.to-struct;
+        put "client --> SERVER:\n{ to-json $struct, :sorted-keys }\n" if $!debug;
+        $!server-conn.send($struct);
     }
 
     method from-server-supply() {
         supply whenever $!server-conn.messages -> $message {
             whenever $message.body -> $struct {
-                put "From server:\n{ $struct.raku.indent(4) }\n" if $!debug;
+                put "From server:\n{ to-json $struct, :sorted-keys }\n" if $!debug;
                 emit $struct<request-id> ?? MUGS::Message::Response.from-struct($struct)
                                          !! MUGS::Message::Push.from-struct($struct)
             }

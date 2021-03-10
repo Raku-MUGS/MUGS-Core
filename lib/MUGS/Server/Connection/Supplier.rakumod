@@ -20,14 +20,13 @@ class MUGS::Server::Connection::Supplier does MUGS::Server::Connection {
     }
 
     method send-to-client(MUGS::Message:D $message) {
-        put "server --> CLIENT:\n{$message.to-struct.raku.indent(4)}\n" if $!debug;
+        put "server --> CLIENT:\n{$message.to-json}\n" if $!debug;
         $!client-conn.send-to-client($message);
     }
 
     method send-to-server(MUGS::Message:D $message) {
         put "server --> SERVER:\n{$message.to-struct.raku.indent(4)}\n" if $!debug;
         $!to-server.emit($message);
-        # put "emitted at server: {$message.to-struct.raku.indent(4)}" if $!debug;
     }
 
     method from-client-supply() { $!from-client }

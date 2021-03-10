@@ -3,6 +3,8 @@
 use MUGS::Message;
 use MUGS::Connection;
 
+use JSON::Fast;
+
 
 #| A Connection served over a WebSocket
 class MUGS::Server::Connection::WebSocket does MUGS::Server::Connection {
@@ -22,14 +24,14 @@ class MUGS::Server::Connection::WebSocket does MUGS::Server::Connection {
 
     method send-to-client(MUGS::Message:D $message) {
         my $struct = $message.to-struct;
-        put "server --> CLIENT:\n{$struct.raku.indent(4)}\n" if $!debug;
+        put "server --> CLIENT:\n{ to-json $struct, :sorted-keys }\n" if $!debug;
         $!to-client.emit($struct);
     }
 
     method from-client-supply() {
         supply whenever $!client-conn -> $message {
             whenever $message.body -> $struct {
-                put "From client:\n{ $struct.raku.indent(4) }\n" if $!debug;
+                put "From client:\n{ to-json $struct, :sorted-keys }\n" if $!debug;
                 emit $struct<game-id>
                     ?? MUGS::Message::Request::InGame.from-struct($struct)
                     !! MUGS::Message::Request.from-struct($struct);

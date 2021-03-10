@@ -31,11 +31,10 @@ class MUGS::Client::Connection::Supplier does MUGS::Client::Connection {
     method send-to-client(MUGS::Message:D $message) {
         put "client --> CLIENT:\n{$message.to-struct.raku.indent(4)}\n" if $!debug;
         $!to-client.emit($message);
-        # put "emitted at client: {$message.to-struct.raku.indent(4)}" if $!debug;
     }
 
     method send-to-server(MUGS::Message:D $message) {
-        put "client --> SERVER:\n{$message.to-struct.raku.indent(4)}\n" if $!debug;
+        put "client --> SERVER:\n{$message.to-json}\n" if $!debug;
         $!server-conn.send-to-server($message);
     }
 
