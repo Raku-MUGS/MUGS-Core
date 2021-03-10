@@ -509,6 +509,8 @@ class MUGS::Server::Session {
 
     #| Log caught exceptions
     method log-exception(Exception:D :$exception!, MUGS::Message::Request:D :$request!) {
+        return unless $*DEBUG || $exception !~~ X::MUGS;
+
         my $context = "in session $.id while processing request $request.id()"
                     ~ (" for user $.user.username()" if $.user);
         note "Caught exception $context: $exception.gist()";
