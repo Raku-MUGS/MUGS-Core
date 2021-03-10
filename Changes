@@ -12,12 +12,16 @@ Revision history for MUGS-Core
   - Show data type name when throwing InvalidStructure from StructureValidator
   - Fix internal Seq escaping from get-info-available-game-types
 
-  [Other changes]
+  [Debugging]
   - Show Connection message debug output as pretty-printed JSON
+  - Don't log X::MUGS typed exceptions in Server unless DEBUG is set
+
+  [Other changes]
   - Refactor and improve MUGS::Server::Game {maybe-,}{start,stop}-game methods
     * Allow genre and leaf game classes to hook start-game and stop-game
     * Only start games that have enough participants
     * Abandon games that drop below minimum participant count
+
 
 0.0.3 2021-03-04
   - First public upload
