@@ -4,11 +4,12 @@ use MUGS::Core;
 
 
 class X::MUGS::InvalidStructure is X::MUGS {
+    has Mu    $.data  is required;
     has Str:D $.type  is required;
     has Str:D $.path  is required;
     has Str:D $.error is required;
 
-    method message() { "$.type.tclc() structure invalid at $.path: $.error" }
+    method message() { "$.type.tclc() structure invalid at $.path: $.error (got {$.data.^name})" }
 }
 
 
@@ -21,7 +22,7 @@ sub validate-structure($type, $data, $schema, $path = 'root') is export {
 
     given $schema {
         when Positional {
-            X::MUGS::InvalidStructure.new(:$type, :$path,
+            X::MUGS::InvalidStructure.new(:$type, :$path, :$data,
                                           :error('must be Positional')).throw
                 unless $data ~~ Positional;
             for $data.kv -> $i, $v {
@@ -29,7 +30,7 @@ sub validate-structure($type, $data, $schema, $path = 'root') is export {
             }
         }
         when Associative {
-            X::MUGS::InvalidStructure.new(:$type, :$path,
+            X::MUGS::InvalidStructure.new(:$type, :$path, :$data,
                                           :error('must be Associative')).throw
                 unless $data ~~ Associative;
             for $schema.kv -> $k, $s {
@@ -37,7 +38,7 @@ sub validate-structure($type, $data, $schema, $path = 'root') is export {
             }
         }
         default {
-            X::MUGS::InvalidStructure.new(:$type, :$path,
+            X::MUGS::InvalidStructure.new(:$type, :$path, :$data,
                                           :error("must be {$schema.^name}")).throw
                 unless $data ~~ $schema;
         }
