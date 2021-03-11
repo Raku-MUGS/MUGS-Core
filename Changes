@@ -1,8 +1,6 @@
 Revision history for MUGS-Core
 
-{{$NEXT}}
-
-0.0.4 *WIP*
+0.0.4  2021-03-10
   [Packaging]
   - Support Docker builds
   - Support `cro run`
@@ -23,5 +21,5 @@ Revision history for MUGS-Core
     * Abandon games that drop below minimum participant count
 
 
-0.0.3 2021-03-04
+0.0.3  2021-03-04
   - First public upload
