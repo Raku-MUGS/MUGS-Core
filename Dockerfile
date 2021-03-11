@@ -5,11 +5,10 @@ ARG rakudo_version
 LABEL maintainer="Geoffrey Broadwell"
 LABEL org.opencontainers.image.source=https://github.com/Raku-MUGS/MUGS-Core
 
-RUN mkdir /home/raku \
- && chmod 700 /home/raku \
- && chown raku:raku /home/raku
-
 WORKDIR /home/raku
+
+RUN chmod 700 /home/raku \
+ && chown raku:raku /home/raku
 
 # Partially adapted from cro-http-websocket Dockerfile, maintained by
 # Jonathan Worthington <jonathan@edument.se>
