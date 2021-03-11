@@ -37,11 +37,9 @@ RUN zef install --deps-only --exclude="pq:ver<5>:from<native>" . \
  && raku -c -Ilib bin/mugs-ws-server \
  && raku -c -Ilib bin/mugs-admin
 
+RUN zef install . --/test
+
 USER raku:raku
-
-RUN zef install .
-
-ENV PATH=/home/raku/.raku/bin:$PATH
 
 RUN mugs-admin create-universe
 
