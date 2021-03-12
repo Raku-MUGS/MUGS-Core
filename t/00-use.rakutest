@@ -37,6 +37,7 @@ use MUGS::Client::Connection::Supplier;
 use MUGS::Server::Connection::WebSocket;
 use MUGS::Client::Connection::WebSocket;
 
+use MUGS::App::CroServer;
 use MUGS::App::WebSocketServer::Routes;
 use MUGS::App::WebSocketServer Empty;
 

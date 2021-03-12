@@ -1,36 +1,13 @@
 # ABSTRACT: Core logic to set up and run a WebSocket MUGS server
 
-use Cro::HTTP::Log::File;
-use Cro::HTTP::Server;
-
+use MUGS::App::CroServer;
+use MUGS::App::WebSocketServer::Routes;
 use MUGS::Server::Universe;
 use MUGS::Server::Stub;
-
-use MUGS::App::WebSocketServer::Routes;
 
 
 # Use subcommand MAIN args
 %PROCESS::SUB-MAIN-OPTS = :named-anywhere;
-
-
-#| Create a Cro::HTTP::Server able to speak the WebSocket protocol
-sub create-websocket-server(:$application!, Str:D :$host!, UInt:D :$port!,
-                            Bool:D :$secure!, :$private-key-file!, :$certificate-file!) {
-    my Cro::Service $http = Cro::HTTP::Server.new(
-        http => <1.1>, :$host, :$port, :$application,
-        |(tls => %( :$private-key-file, :$certificate-file ) if $secure),
-        after => [
-            Cro::HTTP::Log::File.new(logs => $*OUT, errors => $*ERR)
-        ]
-    );
-}
-
-
-#| Convenience method to flush a single message to $*OUT without autoflush
-sub put-flushed(Str:D $message) {
-    put $message;
-    $*OUT.flush;
-}
 
 
 #| Launch a WebSocket MUGS server listening on host:port
@@ -50,16 +27,13 @@ sub MAIN( Str:D :$universe = %*ENV<MUGS_WEBSOCKET_UNIVERSE> || 'default',
     my $mugs-server = $universe ?? create-universe-mugs-server($universe)
                                 !! create-stub-mugs-server;
 
-    put-flushed 'Loading games.';
-    $mugs-server.load-game-plugins;
-    my @loaded = $mugs-server.known-implementations.sort;
-    put-flushed "Loaded: @loaded[]";
+    load-plugins('server', $mugs-server);
 
     put-flushed 'Starting WebSocket server.';
     my $application = routes(:$mugs-server);
-    my $ws-server   = create-websocket-server(:$application, :$host, :$port,
-                                              :$secure, :$private-key-file,
-                                              :$certificate-file);
+    my $ws-server   = create-cro-server(:$application, :$host, :$port,
+                                        :$secure, :$private-key-file,
+                                        :$certificate-file);
 
     $ws-server.start;
     my $root = $application.handlers[0].implementation.signature.params[0].constraint_list[0];
