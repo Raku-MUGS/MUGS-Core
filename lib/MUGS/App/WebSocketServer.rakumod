@@ -23,7 +23,7 @@ sub MAIN( Str:D :$universe = %*ENV<MUGS_WEBSOCKET_UNIVERSE> || 'default',
          Bool:D :$secure = True, Bool:D :$debug = True) is export {
 
     $PROCESS::DEBUG = $debug;
-    put-flushed "Using {$universe ?? "universe '$universe'" !! 'internal stub universe'}.";
+    put-flushed "Using {$universe ?? "universe '$universe'" !! 'internal stub universe'}.\n";
     my $mugs-server = $universe ?? create-universe-mugs-server($universe)
                                 !! create-stub-mugs-server;
 
@@ -38,7 +38,7 @@ sub MAIN( Str:D :$universe = %*ENV<MUGS_WEBSOCKET_UNIVERSE> || 'default',
     $ws-server.start;
     my $root = $application.handlers[0].implementation.signature.params[0].constraint_list[0];
     my $url  = "ws{'s' if $secure}://$host:$port/$root";
-    put-flushed "Listening at $url";
+    put-flushed "Listening at $url\n";
 
     react {
         whenever signal(SIGINT) {
