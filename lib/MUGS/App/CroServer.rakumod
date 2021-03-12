@@ -29,6 +29,8 @@ sub put-flushed(Str:D $message) is export {
 sub load-plugins(Str:D $type, $loader, |c) is export {
     put-flushed "Loading game $type plugins.";
     $loader.load-game-plugins(|c);
-    my @loaded = $loader.known-implementations.sort;
+    my @loaded = $loader.^can('known-implementations')
+                 ?? $loader.known-implementations.sort
+                 !! $loader.known-games(|c);
     put-flushed "Loaded: @loaded[]\n";
 }
