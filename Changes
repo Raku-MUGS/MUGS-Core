@@ -1,6 +1,7 @@
 Revision history for MUGS-Core
 
-0.0.5  *WIP*
+0.0.5  2021-03-12
+  [Packaging]
   - Factor MUGS::App::CroServer helper routines out of ::WebSocketServer
 
 

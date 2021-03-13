@@ -73,5 +73,5 @@
   "test-depends": [
     "Temp::Path"
   ],
-  "version": "0.0.4"
+  "version": "0.0.5"
 }
