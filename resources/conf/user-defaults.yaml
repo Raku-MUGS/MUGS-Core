@@ -15,7 +15,11 @@ UI:
   # Common settings for all UIs
   Common:
      # 80% of accessibility is good universal design that works for everyone;
-     # this is about enabling the last 20% of tuning that requires tradeoffs
+     # this is about enabling the last 20% of tuning that requires tradeoffs.
+     # It is especially important for UIs that do not have intrinsic semantic
+     # richness; for example, raw VT100 terminal output has fewer options for
+     # integrating rich semantic information that assistive technologies can
+     # leverage than HTML5 does.
      tune-for-screen-reader: false
   CLI:
      # Use ANSI attributes (bold etc.) and colors (both 16-color and 256-color)
