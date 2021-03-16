@@ -47,15 +47,6 @@ throws-like { ensure-readable 'missing', 'DoEsNoTeXiSt', :$base-dir },
             X::MUGS::File::Missing,
             "ensure-readable throws on missing file even with valid base-dir";
 
-# File is unreadable
-my $unreadable = make-temp-path :chmod(0o333);
-throws-like { ensure-readable 'unreadable', $unreadable },
-            X::MUGS::File::Unreadable,
-            "ensure-readable throws on unreadable file";
-throws-like { ensure-readable 'unreadable', $unreadable, :$base-dir },
-            X::MUGS::File::Unreadable,
-            "ensure-readable throws on missing file even with valid base-dir";
-
 # File is readable
 my $readable = make-temp-path :chmod(0o444);
 lives-ok { ensure-readable 'readable', $readable },
@@ -63,23 +54,38 @@ lives-ok { ensure-readable 'readable', $readable },
 lives-ok { ensure-readable 'readable', $readable, :$base-dir },
          "ensure-readable lives with a readable file in a valid base-dir";
 
-# File is unwritable
+my $unreadable = make-temp-path :chmod(0o333);
 my $unwritable = make-temp-path :chmod(0o555);
-throws-like { ensure-writable 'unwritable', $unwritable },
-            X::MUGS::File::Unwritable,
-            "ensure-writable throws on unwritable file";
-throws-like { ensure-writable 'unwritable', $unwritable, :$base-dir },
-            X::MUGS::File::Unwritable,
-            "ensure-writable throws on unwritable file even with a valid base-dir";
+my $dir        = make-temp-dir  :chmod(0o555);
 
-# File missing and dir is unwritable
-my $dir = make-temp-dir :chmod(0o555);
-throws-like { ensure-writable 'dir unwritable', "$dir/DoEsNoTeXiSt" },
-            X::MUGS::File::DirUnwritable,
-            "ensure-writable throws on missing file with unwritable dir";
-throws-like { ensure-writable 'dir unwritable', 'DoEsNoTeXiSt', :base-dir($dir) },
-            X::MUGS::File::DirUnwritable,
-            "ensure-writable throws on missing file with unwritable dir even with a valid base-dir";
+if +$*USER {
+    # File is unreadable
+    throws-like { ensure-readable 'unreadable', $unreadable },
+                X::MUGS::File::Unreadable,
+                "ensure-readable throws on unreadable file";
+    throws-like { ensure-readable 'unreadable', $unreadable, :$base-dir },
+                X::MUGS::File::Unreadable,
+                "ensure-readable throws on missing file even with valid base-dir";
+
+    # File is unwritable
+    throws-like { ensure-writable 'unwritable', $unwritable },
+                X::MUGS::File::Unwritable,
+                "ensure-writable throws on unwritable file";
+    throws-like { ensure-writable 'unwritable', $unwritable, :$base-dir },
+                X::MUGS::File::Unwritable,
+                "ensure-writable throws on unwritable file even with a valid base-dir";
+
+    # File missing and dir is unwritable
+    throws-like { ensure-writable 'dir unwritable', "$dir/DoEsNoTeXiSt" },
+                X::MUGS::File::DirUnwritable,
+                "ensure-writable throws on missing file with unwritable dir";
+    throws-like { ensure-writable 'dir unwritable', 'DoEsNoTeXiSt', :base-dir($dir) },
+                X::MUGS::File::DirUnwritable,
+                "ensure-writable throws on missing file with unwritable dir even with a valid base-dir";
+}
+else {
+    skip "Can't test permissions failures when running as root", 6;
+}
 
 # File missing and dir is writable
 lives-ok { ensure-writable 'dir writable', 'DoEsNoTeXiSt' },
@@ -112,7 +118,13 @@ sub load-variants-throw-like($type, $file, $exception) {
 
 # File missing or unreadable
 load-variants-throw-like('missing', 'DoEsNoTeXiSt', X::MUGS::File::Missing);
-load-variants-throw-like('unreadable', $unreadable, X::MUGS::File::Unreadable);
+
+if +$*USER {
+    load-variants-throw-like('unreadable', $unreadable, X::MUGS::File::Unreadable);
+}
+else {
+    skip "Can't test permissions failures when running as root", 4;
+}
 
 # File is unparseable
 my $valid-doc = q:to/YAML/;
