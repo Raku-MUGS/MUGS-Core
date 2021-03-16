@@ -53,7 +53,7 @@ multi ensure-readable(Str:D $type, IO::Path:D $file, :$base-dir) is export {
 }
 
 #| Ensure a specified filename exists and is readable
-multi ensure-readable(Str:D $type, Str() $file, :$base-dir) is export {
+multi ensure-readable(Str:D $type, $file, :$base-dir) is export {
     X::MUGS::File::Unspecified.new(:$type, :$file).throw unless $file;
     ensure-readable($type, $file.IO, :$base-dir);
 }
@@ -74,7 +74,7 @@ multi ensure-writable(Str:D $type, IO::Path:D $file, :$base-dir) is export {
 
 #| Ensure a specified filename either exists and is writable, or does not exist
 #| and the parent is writable
-multi ensure-writable(Str:D $type, Str() $file, :$base-dir) is export {
+multi ensure-writable(Str:D $type, $file, :$base-dir) is export {
     X::MUGS::File::Unspecified.new(:$type, :$file).throw unless $file;
     ensure-writable($type, $file.IO, :$base-dir);
 }
@@ -86,7 +86,7 @@ my Lock $yaml-lock .= new;
 
 
 #| Load a YAML file, either just the first doc (default) or all of them (:all)
-sub load-yaml-file(Str:D $type, IO() $file, :$base-dir, :$all) is export {
+multi load-yaml-file(Str:D $type, IO::Path:D $file, :$base-dir, :$all) is export {
     my $yaml-file = $base-dir ?? $file.absolute($base-dir).IO !! $file;
     ensure-readable($type, $yaml-file);
 
@@ -95,13 +95,22 @@ sub load-yaml-file(Str:D $type, IO() $file, :$base-dir, :$all) is export {
         or X::MUGS::File::Unparseable.new(:$type, :file($yaml-file)).throw;
 }
 
+multi load-yaml-file(Str:D $type, $file, :$base-dir, :$all) is export {
+    X::MUGS::File::Unspecified.new(:$type, :$file).throw unless $file;
+    load-yaml-file($type, $file.IO, :$base-dir, :$all);
+}
 
 #| Write a YAML file, made of one or more YAML documents
-sub write-yaml-file(Str:D $type, IO() $file, **@documents, :$base-dir, Int() :$mode = 0o600) is export {
+multi write-yaml-file(Str:D $type, IO::Path:D $file, **@documents, :$base-dir, Int() :$mode = 0o600) is export {
     my $yaml-file = $base-dir ?? $file.absolute($base-dir).IO !! $file;
     ensure-writable($type, $yaml-file);
 
     my $yaml = save-yamls(|@documents);
     spurt($yaml-file, $yaml);
     $yaml-file.chmod($mode);
+}
+
+multi write-yaml-file(Str:D $type, $file, **@documents, :$base-dir, Int() :$mode = 0o600) is export {
+    X::MUGS::File::Unspecified.new(:$type, :$file).throw unless $file;
+    write-yaml-file($type, $file.IO, |@documents, :$base-dir, :$mode);
 }
