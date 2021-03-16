@@ -179,4 +179,31 @@ is load-yaml-file('valid-double', $valid-double, :all, :$base-dir), ($expected, 
 
 ### write-yaml-file
 
+# Filename
+# * Missing
+# * Specified
+
+# Base dir
+# * Not included
+# * Included
+
+# Write permissions
+# * Directory doesn't exist
+# * Directory isn't writeable
+# * File already exists and isn't writeable
+# * File already exists and is overwriteable
+# * File doesn't exist but directory is writeable
+
+# Contents
+# * Write no documents
+# * Write a single doc
+# * Write 2-3 docs
+
+# File mode
+# * Default ends up correct on overwrite
+# * Default ends up correct on new file
+# * Manually set works on overwrite
+# * Manually set works on new file
+
+
 # XXXX: HERE
