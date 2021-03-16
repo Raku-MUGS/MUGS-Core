@@ -1,5 +1,13 @@
 Revision history for MUGS-Core
 
+0.0.6  *WIP*
+  [Packaging]
+  - Run tests during Docker packaging
+
+  [Tests]
+  - Allow tests to be run as root
+
+
 0.0.5  2021-03-12
   [Packaging]
   - Factor MUGS::App::CroServer helper routines out of ::WebSocketServer
