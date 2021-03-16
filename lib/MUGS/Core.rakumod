@@ -49,7 +49,7 @@ MUGS-Core - Core modules for MUGS (Multi-User Gaming Services)
   cd MUGS
   git clone git@github.com:Raku-MUGS/MUGS-Core.git
   cd MUGS-Core
-  zef install --deps-only .
+  zef install --deps-only --exclude="pq:ver<5>:from<native>" .
   raku -Ilib bin/mugs-admin create-universe
 
 

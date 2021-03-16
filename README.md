@@ -13,7 +13,7 @@ SYNOPSIS
     cd MUGS
     git clone git@github.com:Raku-MUGS/MUGS-Core.git
     cd MUGS-Core
-    zef install --deps-only .
+    zef install --deps-only --exclude="pq:ver<5>:from<native>" .
     raku -Ilib bin/mugs-admin create-universe
 
 DESCRIPTION
