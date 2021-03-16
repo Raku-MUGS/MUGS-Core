@@ -1,11 +1,15 @@
 Revision history for MUGS-Core
 
 0.0.6  *WIP*
+  [Bug fixes]
+  - Handle undefined files better in MUGS::Util::File
+
   [Packaging]
   - Run tests during Docker packaging
 
   [Tests]
   - Allow tests to be run as root
+  - Test remaining bits of MUGS::Util::File
 
 
 0.0.5  2021-03-12
