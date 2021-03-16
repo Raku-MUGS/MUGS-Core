@@ -1,0 +1,125 @@
+use Test;
+
+use MUGS::Util::ImplementationRegistry;
+
+
+plan 34;
+
+
+### Roles and classes to track
+
+my role Foo { }
+my role Bar { }
+my class Registry   does MUGS::Util::ImplementationRegistry[Foo] { }
+my class UIRegistry does MUGS::Util::UIRegistry[Bar] { }
+
+my class FooA does Foo { }
+my class FooB does Foo { }
+my class BarC does Bar { }
+my class BarD does Bar { }
+my class BarE does Bar { }
+my class Quux          { }
+
+
+### ImplementationRegistry (non-UI-specific)
+
+# register-implementation
+lives-ok { Registry.register-implementation('foo-a', FooA) },
+         "Can register a valid class";
+lives-ok { Registry.register-implementation('foo-b', FooB) },
+         "Can register a second valid class";
+
+dies-ok  { Registry.register-implementation('bar-c', BarC) },
+         "Can't register a class that doesn't match the constraint";
+
+
+# implementation-exists
+for < foo-a foo-b > {
+    ok Registry.implementation-exists($_), "Registry entry exists for $_";
+}
+
+for < bar-c quux > {
+    nok Registry.implementation-exists($_), "Registry entry DOES NOT exist for $_";
+}
+
+
+# implementation-class
+my $foo-a = Registry.implementation-class('foo-a');
+my $foo-b = Registry.implementation-class('foo-b');
+my $bar-c = Registry.implementation-class('bar-c');
+my $quux  = Registry.implementation-class('quux');
+
+ok $foo-a === FooA, "Implementation class for foo-a is correct";
+ok $foo-b === FooB, "Implementation class for foo-b is correct";
+ok $bar-c === Any,  "Implementation class for bar-c not registered";
+ok $quux  === Any,  "Implementation class for quux  not registered";
+
+
+# known-implementations
+is Registry.known-implementations.sort.join(' '), 'foo-a foo-b',
+   "Known implementations list is correct";
+
+
+### UIRegistry (UI-specific)
+
+# register-ui
+lives-ok { UIRegistry.register-ui('UI-1', 'bar-c', BarC) },
+         "Can register a valid UI class";
+lives-ok { UIRegistry.register-ui('UI-1', 'bar',   BarD) },
+         "Can register a second valid UI class";
+lives-ok { UIRegistry.register-ui('UI-2', 'bar',   BarE) },
+         "Can register a third valid UI class, in a second UI";
+
+dies-ok  { UIRegistry.register-ui('UI-2', 'foo-a', FooA) },
+         "Can't register a UI class that doesn't match the constraint";
+
+
+# ui-exists
+for < bar-c > {
+    ok  UIRegistry.ui-exists('UI-1', $_), "UIRegistry entry exists for $_ in UI-1";
+    nok UIRegistry.ui-exists('UI-2', $_), "... and NOT in UI-2";
+}
+
+for < bar > {
+    ok  UIRegistry.ui-exists('UI-1', $_), "UIRegistry entry exists for $_ in UI-1";
+    ok  UIRegistry.ui-exists('UI-2', $_), "... and also in UI-2";
+}
+
+for < foo-a quux > {
+    nok UIRegistry.ui-exists('UI-1', $_), "UIRegistry entry DOES NOT exist for $_";
+    nok UIRegistry.ui-exists('UI-2', $_), "... in either UI registry";
+}
+
+
+# ui-class
+my $foo-a1 = UIRegistry.ui-class('UI-2', 'foo-a');
+my $bar-c1 = UIRegistry.ui-class('UI-1', 'bar-c');
+my $bar-d1 = UIRegistry.ui-class('UI-1', 'bar');
+my $bar-e1 = UIRegistry.ui-class('UI-2', 'bar');
+my $quux1  = UIRegistry.ui-class('UI-1', 'quux');
+
+ok $foo-a1 === Any,  "UI class for foo-a not registered";
+ok $bar-c1 === BarC, "UI class for bar-c is correct";
+ok $bar-d1 === BarD, "UI class for bar in UI-1 is correct";
+ok $bar-e1 === BarE, "UI class for bar in UI-2 is correct";
+ok $quux1  === Any,  "UI class for quux  not registered";
+
+
+# known-uis
+is UIRegistry.known-uis.sort.join(' '), 'UI-1 UI-2',
+   'Known UIs list is correct';
+
+is UIRegistry.known-uis('bar-c').sort.join(' '), 'UI-1',
+   'bar-c only exists in UI-1';
+is UIRegistry.known-uis('bar').sort.join(' '), 'UI-1 UI-2',
+   'bar exists in both UIs';
+
+
+# known-games
+is UIRegistry.known-games('UI-1').sort.join(' '), 'bar bar-c',
+   'Known games for UI-1 is correct';
+is UIRegistry.known-games('UI-2').sort.join(' '), 'bar',
+   'Known games for UI-2 is correct';
+
+
+done-testing;

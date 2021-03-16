@@ -11,6 +11,7 @@ Revision history for MUGS-Core
   [Tests]
   - Allow tests to be run as root
   - Test remaining bits of MUGS::Util::File
+  - Add tests for MUGS::Util::{Implementation,UI}Registry
 
 
 0.0.5  2021-03-12
