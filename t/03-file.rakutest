@@ -4,7 +4,7 @@ use Temp::Path;
 use MUGS::Util::File;
 
 
-plan 55;
+plan 119;
 
 
 # Check correct exception subclassing
@@ -21,19 +21,29 @@ temp $*TMPDIR = my $base-dir = make-temp-dir :chmod(0o700);
 ### ensure-readable/ensure-writable
 
 # Undefined/empty filename
+throws-like { ensure-readable 'empty', IO::Path }, X::MUGS::File::Unspecified,
+            "ensure-readable throws on undefined IO::Path";
 throws-like { ensure-readable 'empty', Str }, X::MUGS::File::Unspecified,
             "ensure-readable throws on undefined filename";
 throws-like { ensure-readable 'empty', ''  }, X::MUGS::File::Unspecified,
             "ensure-readable throws on empty filename";
+
+throws-like { ensure-writable 'empty', IO::Path }, X::MUGS::File::Unspecified,
+            "ensure-writable throws on undefined IO::Path";
 throws-like { ensure-writable 'empty', Str }, X::MUGS::File::Unspecified,
             "ensure-writable throws on undefined filename";
 throws-like { ensure-writable 'empty', ''  }, X::MUGS::File::Unspecified,
             "ensure-writable throws on empty filename";
 
+throws-like { ensure-readable 'empty', IO::Path, :$base-dir }, X::MUGS::File::Unspecified,
+            "ensure-readable throws on undefined IO::Path even with valid base-dir";
 throws-like { ensure-readable 'empty', Str, :$base-dir }, X::MUGS::File::Unspecified,
             "ensure-readable throws on undefined filename even with valid base-dir";
 throws-like { ensure-readable 'empty', '',  :$base-dir }, X::MUGS::File::Unspecified,
             "ensure-readable throws on empty filename even with valid base-dir";
+
+throws-like { ensure-writable 'empty', IO::Path, :$base-dir }, X::MUGS::File::Unspecified,
+            "ensure-writable throws on undefined IO::Path even with valid base-dir";
 throws-like { ensure-writable 'empty', Str, :$base-dir }, X::MUGS::File::Unspecified,
             "ensure-writable throws on undefined filename even with valid base-dir";
 throws-like { ensure-writable 'empty', '',  :$base-dir }, X::MUGS::File::Unspecified,
@@ -179,31 +189,64 @@ is load-yaml-file('valid-double', $valid-double, :all, :$base-dir), ($expected, 
 
 ### write-yaml-file
 
-# Filename
-# * Missing
-# * Specified
+sub write-variants-throw-like($type, $file, $document, $exception) {
+    my $desc = "write-yaml-file throws on $type file";
 
-# Base dir
-# * Not included
-# * Included
+    throws-like { write-yaml-file($type, $file, $document) },
+                $exception, $desc;
+    throws-like { write-yaml-file($type, $file, $document, :$base-dir) },
+                $exception, "$desc with valid base-dir";
+}
 
-# Write permissions
-# * Directory doesn't exist
-# * Directory isn't writeable
-# * File already exists and isn't writeable
-# * File already exists and is overwriteable
-# * File doesn't exist but directory is writeable
+write-variants-throw-like('unspecified', Str,      $expected, X::MUGS::File::Unspecified);
+write-variants-throw-like('unspecified', '',       $expected, X::MUGS::File::Unspecified);
+write-variants-throw-like('unspecified', IO::Path, $expected, X::MUGS::File::Unspecified);
 
-# Contents
-# * Write no documents
-# * Write a single doc
-# * Write 2-3 docs
+write-variants-throw-like('dir missing', 'NoTaReAlDiR/DoEsNoTeXiSt', $expected,
+                          X::MUGS::File::DirUnwritable);
 
-# File mode
-# * Default ends up correct on overwrite
-# * Default ends up correct on new file
-# * Manually set works on overwrite
-# * Manually set works on new file
+if +$*USER {
+    # File is unwritable
+    write-variants-throw-like('unwritable', $unwritable, $expected,
+                              X::MUGS::File::Unwritable);
+
+    # File missing and dir is unwritable
+    write-variants-throw-like('dir unwritable', "$dir/DoEsNoTeXiSt", $expected,
+                              X::MUGS::File::DirUnwritable);
+}
+else {
+    skip "Can't test permissions failures when running as root", 4;
+}
 
 
-# XXXX: HERE
+sub write-variants-create($type, $file, $expected, **@documents) {
+    my $desc = "write-yaml-file created a file from {+@documents} doc{'s' unless @documents == 1} for $type test";
+
+    write-yaml-file($type, "$base-dir/$file", |@documents);
+    ok  "$base-dir/$file".IO.e,                $desc;
+    is +"$base-dir/$file".IO.mode,  0o600,     '... with the correct default mode';
+    is  "$base-dir/$file".IO.slurp, $expected, '... containing the expected output';
+
+    my $file2 = $file ~ '2';
+    write-yaml-file($type, "$base-dir/$file2", |@documents, :mode(0o640));
+    ok  "$base-dir/$file2".IO.e,                $desc ~ ' with mode set';
+    is +"$base-dir/$file2".IO.mode,  0o640,     '... with the correct mode';
+    is  "$base-dir/$file2".IO.slurp, $expected, '... containing the expected output';
+
+    my $file3 = $file ~ '3';
+    write-yaml-file($type, $file3, |@documents, :$base-dir);
+    ok  "$base-dir/$file3".IO.e,                $desc ~ ' with valid base-dir';
+    is +"$base-dir/$file3".IO.mode,  0o600,     '... with the correct default mode';
+    is  "$base-dir/$file3".IO.slurp, $expected, '... containing the expected output';
+
+    my $file4 = $file ~ '4';
+    write-yaml-file($type, $file4, |@documents, :$base-dir, :mode(0o640));
+    ok  "$base-dir/$file4".IO.e,                $desc ~ ' with valid base-dir and mode set';
+    is +"$base-dir/$file4".IO.mode,  0o640,     '... with the correct mode';
+    is  "$base-dir/$file4".IO.slurp, $expected, '... containing the expected output';
+}
+
+write-variants-create('empty',      'file0.yaml', "...");
+write-variants-create('single doc', 'file1.yaml', "---\n- 42\n...", [42]);
+write-variants-create('duo-doc',    'file2.yaml', "---\n- 42\n---\nfoo: bar\n...", [42], { foo => 'bar' });
+write-variants-create('overwrite',  'file2.yaml', "---\n- 7\n...", [7]);
