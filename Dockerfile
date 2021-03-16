@@ -37,7 +37,7 @@ RUN zef install --deps-only --exclude="pq:ver<5>:from<native>" . \
  && raku -c -Ilib bin/mugs-ws-server \
  && raku -c -Ilib bin/mugs-admin
 
-RUN zef install . --/test
+RUN zef install .
 
 USER raku:raku
 
