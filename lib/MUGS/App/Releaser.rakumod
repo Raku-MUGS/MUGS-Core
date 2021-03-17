@@ -15,6 +15,23 @@ subset Version  of Str where &version;  #= Improves output of USAGE
 subset Codename of Any where Bool|Str;  #= Improves output of USAGE
 
 
+#| Error and exit unless current directory looks like a repo root
+sub ensure-at-repo-root() {
+    unless 'META6.json'.IO.e && '.git'.IO.d {
+        note '!!! Must run this command from a repo root';
+        exit 1;
+    }
+}
+
+
+#| Do basic startup prep
+sub prep($version) {
+    %*ENV<NEXT_MUGS_VERSION> = $version;
+
+    ensure-at-repo-root;
+}
+
+
 #| Quote command in shell-like fashion
 sub quote-command(@cmd) {
     my @quoted = @cmd.map: {
@@ -44,7 +61,7 @@ multi MAIN(
     Codename :$codename!,  #= Code name (or --/codename to not use one)
     Bool     :$force,      #= Actually execute commands (instead of just print them)
 ) is export {
-    %*ENV<NEXT_MUGS_VERSION> = $version;
+    prep($version);
 
     run-or-exit($_, :$force) for
         « git tag -a "v$version" -m "Release $version" »,
