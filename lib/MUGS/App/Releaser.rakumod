@@ -65,7 +65,7 @@ multi MAIN(
 
     run-or-exit($_, :$force) for
         « git tag -a "v$version" -m "Release $version" »,
-       (« git tag -a "$codename" -m "Codename: $codename" » if $codename),
+       (« git tag -a "$codename" -m "Codename: $codename" » if $codename ~~ Str:D),
         « git push »,
         « git push --tags »,
         « zef install . »,
