@@ -4,6 +4,10 @@ Revision history for MUGS-Core
   [Bug Fixes]
   - Add dependency on Terminal::ANSIColor (for mugs-release)
 
+  [Packaging]
+  - Ensure mugs-release is run from repo root
+  - Add 'check' subcommand to mugs-release to confirm repo is ready
+
   [UI/UX]
   - Improve clarity of output from mugs-release
 
