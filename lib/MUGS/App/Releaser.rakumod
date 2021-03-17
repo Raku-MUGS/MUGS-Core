@@ -55,7 +55,26 @@ sub run-or-exit(@cmd, :$force) {
 }
 
 
-#| Perform automated release steps on the current repository
+#| Check whether repo is in good shape to release
+multi MAIN(
+    'check',
+    Version :$version!,  #= Standard three-part version string (A.B.C)
+) is export {
+    prep($version);
+    my $today = ~Date.today;
+
+    run-or-exit($_, :force) for
+        « mi6 test »,
+        « fez checkbuild »,
+        « grep $version Changes »,
+        « grep "$version\\s\\+$today" Changes »,
+        ;
+
+    put colored('--> All check commands executed successfully.', 'bold blue');
+}
+
+
+#| Perform automated release steps on the current repo
 multi MAIN(
     Version  :$version!,   #= Standard three-part version string (A.B.C)
     Codename :$codename!,  #= Code name (or --/codename to not use one)
