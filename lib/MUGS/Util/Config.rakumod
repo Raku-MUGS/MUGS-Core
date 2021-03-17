@@ -63,18 +63,18 @@ class MUGS::Util::Config {
         return structure-error("Top level of config is not a map of section names to config sections.")
             unless $config ~~ Map;
         return structure-error("Top level of config has an empty or non-string section name.")
-            if $config.keys.first: { !($_ || $_ ~~ Str) };
+            if $config.keys.grep: { !($_ && $_ ~~ Str) };
 
         my @non-maps = $config.keys.grep({ $config{$_} !~~ Map }).map:
             { structure-error("Config section '$_' is not a key-value map.") };
         return @non-maps if @non-maps;
 
         my @empty-keys = $config.keys.grep(-> $key {
-            $config{$key}.first({ !($_ || $_ ~~ Str) }).so
+            $config{$key}.keys.grep({ !($_ && $_ ~~ Str) }).so
         }).map: { structure-error("Config section '$_' contains an empty or non-string config key.") };
         return @empty-keys if @empty-keys;
 
-        # XXXX: All keys should be lowercase ASCII, only [a-z] + '-'
+        # XXXX: All keys should be ASCII, only [a-zA-Z] + '-'
 
         return Empty;
     }

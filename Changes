@@ -3,6 +3,7 @@ Revision history for MUGS-Core
 0.0.6  *WIP*
   [Bug fixes]
   - Handle undefined files better in MUGS::Util::File
+  - Fix detection of empty config file keys
   - Exclude pq from dependencies install in README SYNOPSIS
 
   [Packaging]
