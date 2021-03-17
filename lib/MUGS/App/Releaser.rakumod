@@ -50,5 +50,6 @@ multi MAIN(
         « fez upload »,
         ;
 
-    say "--> All release commands executed successfully.";
+    say $force ?? "--> All release commands executed successfully."
+               !! "!!! All release commands SKIPPED without --force."
 }
