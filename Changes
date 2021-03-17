@@ -1,5 +1,10 @@
 Revision history for MUGS-Core
 
+0.0.7  *WIP*
+  [UI/UX]
+  - Improve clarity of output from mugs-release
+
+
 0.0.6  2021-03-16
   [Bug fixes]
   - Handle undefined files better in MUGS::Util::File

@@ -1,6 +1,9 @@
 # ABSTRACT: Tool for releasing a MUGS repo
 
 
+use Terminal::ANSIColor;
+
+
 # Use subcommand MAIN args
 %PROCESS::SUB-MAIN-OPTS = :named-anywhere;
 
@@ -23,13 +26,15 @@ sub quote-command(@cmd) {
 
 #| Run a command successfully or error out and exit
 sub run-or-exit(@cmd, :$force) {
-    say '=== ' ~ quote-command(@cmd).join(' ');
+    put colored('=== ' ~ quote-command(@cmd).join(' '), 'yellow');
     return unless $force;
 
     unless run @cmd {
         note '!!! Command execution failed, exiting.';
         exit 1;
     }
+
+    put '';
 }
 
 
@@ -50,6 +55,6 @@ multi MAIN(
         « fez upload »,
         ;
 
-    say $force ?? "--> All release commands executed successfully."
-               !! "!!! All release commands SKIPPED without --force."
+    put $force ?? colored('--> All release commands executed successfully.', 'bold blue')
+               !! colored('!!! All release commands SKIPPED without --force !!!', 'red')
 }
