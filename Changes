@@ -8,6 +8,7 @@ Revision history for MUGS-Core
 
   [Packaging]
   - Run tests during Docker packaging
+  - Add a mugs-release tool to automate parts of the release process
 
   [Tests]
   - Allow tests to be run as root
