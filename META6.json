@@ -14,6 +14,7 @@
     "Pluggable",
     "Red",
     "Temp::Path",
+    "Terminal::ANSIColor",
     "YAMLish"
   ],
   "description": "Core modules for MUGS (Multi-User Gaming Services)",

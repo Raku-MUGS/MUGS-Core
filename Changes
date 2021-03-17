@@ -1,6 +1,9 @@
 Revision history for MUGS-Core
 
 0.0.7  *WIP*
+  [Bug Fixes]
+  - Add dependency on Terminal::ANSIColor (for mugs-release)
+
   [UI/UX]
   - Improve clarity of output from mugs-release
 
