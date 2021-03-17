@@ -73,5 +73,5 @@ multi MAIN(
         ;
 
     put $force ?? colored('--> All release commands executed successfully.', 'bold blue')
-               !! colored('!!! All release commands SKIPPED without --force !!!', 'red')
+               !! colored('!!! All release commands SKIPPED without --force !!!', 'red');
 }
