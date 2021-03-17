@@ -8,11 +8,11 @@ use Terminal::ANSIColor;
 %PROCESS::SUB-MAIN-OPTS = :named-anywhere;
 
 
-# A standard three-part version
+#| A standard three-part version
 my regex version { ^ $<major>=[\d+] '.' $<minor>=[\d+] '.' $<patch>=[\d+] $ }
 
-subset Version  of Str where &version;
-subset Codename of Any where Bool|Str;
+subset Version  of Str where &version;  #= Improves output of USAGE
+subset Codename of Any where Bool|Str;  #= Improves output of USAGE
 
 
 #| Quote command in shell-like fashion
