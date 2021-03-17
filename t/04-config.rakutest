@@ -1,0 +1,99 @@
+use Test;
+use Temp::Path;
+
+use MUGS::Util::Config;
+
+
+plan 37;
+
+
+# Exception types
+isa-ok X::MUGS::Config, X::MUGS, "X::MUGS::Config derives from X::MUGS";
+isa-ok X::MUGS::Config::Structure, X::MUGS::Config,
+       "X::MUGS::Config::Structure likewise derives from X::MUGS::Config";
+
+
+# Set up a temporary directory for all of the following
+temp $*TMPDIR = my $config-dir = make-temp-dir :chmod(0o700);
+
+
+# Config creation
+my ($user, $extra);
+
+lives-ok { $user  = MUGS::Util::Config.new(type => 'user',  :$config-dir) },
+         "Can create a 'user' config object";
+lives-ok { $extra = MUGS::Util::Config.new(type => 'extra', :$config-dir) },
+         "Can create an 'extra' config object";
+dies-ok  { my $no-type = MUGS::Util::Config.new(:$config-dir) },
+         "Can't create an untyped config object";
+
+
+# value (with no configs loaded)
+my  $default-server  = $user.value('Servers', 'DEFAULT');
+nok $default-server.defined,
+    "Before loading configs, Servers/DEFAULT value does not exist";
+
+my  $internal-server = $user.value('Servers', 'internal');
+nok $internal-server.defined,
+    "Before loading configs, Servers/internal does not exist";
+
+
+# load-defaults
+my @errors;
+
+lives-ok { @errors = $user.load-defaults },  "Can load user defaults from resources";
+nok @errors, "... and there are no errors";
+
+lives-ok { @errors = $extra.load-defaults }, "Can try to load extra defaults";
+ok @errors, "... but they don't exist in resources";
+
+
+# value (with only defaults loaded)
+$default-server = $user.value('Servers', 'DEFAULT');
+is $default-server, 'internal',
+   "After loading defaults, Servers/DEFAULT has correct value";
+
+$internal-server = $user.value('Servers', 'internal');
+isa-ok $internal-server, Map,
+       "After loading defaults, Servers/internal is a Map";
+
+
+# load-config-file
+lives-ok { @errors = $user.load-config-file }, "Can try to load missing config file";
+is +@errors, 1,                                "... but it gets an error";
+isa-ok @errors[0], X::MUGS::File::Missing,     "... marking the file missing";
+
+"$config-dir/user-config.yaml".IO.spurt("...");
+lives-ok { @errors = $user.load-config-file }, "Can try to load invalid config file";
+is +@errors, 1,                                "... but it gets an error";
+isa-ok @errors[0], X::MUGS::File::Unparseable, "... marking the file unparseable";
+
+sub has-bad-structure($content, $reason is copy) {
+    $reason [R~]= "Can try to load config file with ";
+    "$config-dir/user-config.yaml".IO.spurt("---\n$content\n...");
+
+    lives-ok { @errors = $user.load-config-file }, $reason;
+    is +@errors, 1,                                "... but it gets an error";
+    isa-ok @errors[0], X::MUGS::Config::Structure, "... marking the file structure bad";
+    # diag "Error: @errors[0].message()";
+}
+
+has-bad-structure("- 4\n- 5",        "array top level");
+has-bad-structure("'':\n  foo: bar", "empty key at top level");
+has-bad-structure("Servers: ''",     "Servers section containing only a string");
+has-bad-structure("Servers:\n  - 6", "Servers section containing an array");
+has-bad-structure("Servers:\n  '':\n    foo: bar",
+                  "Servers section containing an empty subkey");
+
+"$config-dir/user-config.yaml".IO.spurt("---\nServers:\n  DEFAULT: my-server\n...");
+lives-ok { @errors = $user.load-config-file }, "Can try to load valid config file";
+nok @errors, "... and there are no errors";
+
+
+# value (with all configs loaded)
+$default-server = $user.value('Servers', 'DEFAULT');
+is $default-server, 'my-server',
+   "After loading user config, Servers/DEFAULT has new value";
+
+
+done-testing;
