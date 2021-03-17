@@ -1,6 +1,6 @@
 Revision history for MUGS-Core
 
-0.0.6  *WIP*
+0.0.6  2021-03-16
   [Bug fixes]
   - Handle undefined files better in MUGS::Util::File
   - Fix detection of empty config file keys
