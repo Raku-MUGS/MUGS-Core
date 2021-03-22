@@ -63,11 +63,13 @@ multi MAIN(
     prep($version);
     my $today = ~Date.today;
 
+    my $escaped-dots = $version.subst('.', "\\.", :g);
+
     run-or-exit($_, :force) for
         « mi6 test »,
         « fez checkbuild »,
-        « grep $version Changes »,
-        « grep "$version\\s\\+$today" Changes »,
+        « grep $escaped-dots Changes »,
+        « grep "$escaped-dots\\s\\+$today" Changes »,
         ;
 
     put colored('--> All check commands executed successfully.', 'bold blue');
