@@ -1,6 +1,6 @@
 Revision history for MUGS-Core
 
-0.0.7  *WIP*
+0.1.0  2021-03-21
   [Bug Fixes]
   - Add dependency on Terminal::ANSIColor (for mugs-release)
 

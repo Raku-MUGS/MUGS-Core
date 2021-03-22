@@ -1,6 +1,6 @@
 # ABSTRACT: Core intro docs and global definitions for MUGS
 
-unit class MUGS::Core:auth<zef:japhb>:ver<0.0.6>;
+unit class MUGS::Core:auth<zef:japhb>:ver<0.1.0>;
 
 
 # Type for GameIDs
