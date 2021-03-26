@@ -1,5 +1,16 @@
 Revision history for MUGS-Core
 
+0.1.1  *WIP*
+  [Identities]
+  - All identity types now do MUGS::Identity role
+
+  [Universes]
+  - Support schema versioning, meta-state, and introspection
+  - Generalize schema bootstrapping operation
+  - Support `mugs-admin update-universe`
+  - Check schema metadata when validating database
+
+
 0.1.0  2021-03-21
   [Bug Fixes]
   - Add dependency on Terminal::ANSIColor (for mugs-release)
