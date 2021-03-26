@@ -2,13 +2,14 @@
 
 use MUGS::Core;
 
+role MUGS::Identity { }
 
 role MUGS::Persona { ... }
 role MUGS::Account { ... }
 
 
 #| A security entity (can be added to ACLs and be wallet for login/security credentials)
-role MUGS::User {
+role MUGS::User does MUGS::Identity {
     method username { ... }
     method account  { ... }
 
@@ -29,14 +30,14 @@ role MUGS::User {
 
 
 #| A playable game entity
-role MUGS::Character {
+role MUGS::Character does MUGS::Identity {
     method screen-name { ... }
     method persona     { ... }
 }
 
 
 #| A distinct player persona, with its own screen name and character roster
-role MUGS::Persona {
+role MUGS::Persona does MUGS::Identity {
     method screen-name       { ... }
 
     # A Character must belong to exactly one Persona at any given time
@@ -51,7 +52,7 @@ role MUGS::Persona {
 
 
 #| A collection for managing users and personas
-role MUGS::Account {
+role MUGS::Account does MUGS::Identity {
     method users                { ... }
     method personas             { ... }
     method user-can-use-persona { ... }
