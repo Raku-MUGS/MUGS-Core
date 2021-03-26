@@ -44,6 +44,11 @@ class MUGS::Universe::Admin is MUGS::Universe {
         $.identity-store.schema-bootstrap;
     }
 
+    #| Update the universe DB to current schema and standards
+    method update-db() {
+        $.identity-store.schema-update;
+    }
+
     #| Create the base admin account, and its owning meta-admin user
     method create-meta-admin() {
         # Create first account
@@ -92,7 +97,46 @@ multi MAIN('create-universe',
                      :meta-admins($meta-admin-name,));
     $universe.ensure-valid;
 
-    say "Universe '$universe-name' created successfully in $universe.universe-root()";
+    my %info = $universe.db-schema-info;
+
+    say "Universe '$universe-name' created successfully in $universe.universe-root() with schema version %info<version>.";
+}
+
+
+#| Update a MUGS universe to latest schema and standards
+multi MAIN('update-universe',
+           Str:D   $universe-name = 'default',
+           Bool:D :$force         = False,
+          ) is export {
+    my $universe = MUGS::Universe::Admin.new(:$universe-name);
+    unless $universe.exists {
+        note qq:to/MISSING/;
+
+            Universe '$universe-name' does not yet exist; you can create it using:
+
+                mugs-admin create-universe $universe-name
+            MISSING
+        exit 1;
+    }
+
+    $universe.load-config;
+    $universe.attach-to-database;
+
+    my %info = $universe.db-schema-info;
+    say "Universe '$universe-name' is in state '%info<state>' at version %info<version>.";
+    say "Target version is %info<expected-version>.\n";
+
+    if !$force && %info<state>   eq 'ready'
+               && %info<version> eq %info<expected-version> {
+        say "Skipping update because DB appears to be up to date; use --force to override.";
+        exit 0;
+    }
+
+    say "Beginning database update.";
+    $universe.update-db;
+    $universe.ensure-valid;
+
+    say "Universe '$universe-name' updated successfully to version %info<version>.";
 }
 
 
@@ -116,5 +160,5 @@ multi MAIN('add-test-identities',
     my $server = create-universe-mugs-server($universe);
     my $user   = $server.create-account-owner(:username<dakota>, :password<d>);
 
-    say "Test data created in universe '$universe-name' identity database";
+    say "Test data created in universe '$universe-name' identity database.";
 }

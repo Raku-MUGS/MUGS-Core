@@ -111,6 +111,13 @@ class MUGS::Universe {
         $!identity-store   = $driver-package.WHO<Identities>.new(:$database);
     }
 
+    #| Introspect universe DB schema version and state
+    method db-schema-info() {
+        my %info = $!identity-store.schema-version;
+        %info<expected-version> = $!identity-store.schema-expected-version;
+        %info
+    }
+
     #| Die unless the universe has a valid directory structure and config file
     method ensure-config-valid() {
         die "Universe dir '$.universe-dir' for universe '$.universe-name' does not exist."
@@ -137,6 +144,13 @@ class MUGS::Universe {
 
     #| Die unless the universe has a self-consistent DB with an up to date schema
     method ensure-db-consistent() {
+        # Check schema state metadata
+        my %info = self.db-schema-info;
+        die "Universe DB for universe '$.universe-name' is in unexpected state '%info<state>'"
+            unless %info<state> eq 'ready';
+        die "Universe DB for universe '$.universe-name' has version %info<version>, but expected %info<expected-version> instead"
+            unless %info<version> eq %info<expected-version>;
+
         # XXXX: Check schema
         # XXXX: Check meta-admins exist in user tables
         # XXXX: Check at least one meta-admin has login credentials
