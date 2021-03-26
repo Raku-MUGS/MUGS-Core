@@ -76,6 +76,27 @@ class Identities
     has %!user;
     has %!persona;
     has %!character;
+    has %!deconfused;
+    has Lock::Async $!reservation-lock .= new;
+
+
+    method name-reservation(::?CLASS:D: Str:D $name) {
+        my $deconfused = self.fold-name($name);
+        %!deconfused{$deconfused}
+    }
+
+    method name-reserved(::?CLASS:D: Str:D $name) {
+        my $deconfused = self.fold-name($name);
+        %!deconfused{$deconfused}:exists
+    }
+
+    method reserve-name(::?CLASS:D: MUGS::Identity:U $identity-type, Str:D $name) {
+        my $folded = self.fold-name($name);
+        $!reservation-lock.protect: {
+            die "Name already reserved" if %!deconfused{$folded};
+            %!deconfused{$folded} = %( :$folded, :$identity-type, :$name );
+        }
+    }
 
     method new-account(::?CLASS:D:) {
         my $account = Account.new;
@@ -84,18 +105,21 @@ class Identities
     }
 
     method new-user(::?CLASS:D: Str:D :$username!, MUGS::Account:D :$account!) {
+        self.reserve-name(Account, $username);
         my $user = User.new(:$username, :$account);
         $account.add-user($user);
         %!user{$username} = $user
     }
 
     method new-persona(::?CLASS:D: Str:D :$screen-name!, MUGS::Account:D :$account!) {
+        self.reserve-name(Persona, $screen-name);
         my $persona = Persona.new(:$screen-name);
         $account.add-persona($persona);
         %!persona{$screen-name} = $persona
     }
 
     method new-character(::?CLASS:D: Str:D :$screen-name!, MUGS::Persona:D :$persona!) {
+        self.reserve-name(Character, $screen-name);
         my $character = Character.new(:$screen-name, :$persona);
         $persona.add-character($character);
         %!character{$screen-name} = $character
@@ -111,5 +135,16 @@ class Identities
 
     method character-by-name(::?CLASS:D: Str:D $screen-name) {
         %!character{$screen-name} or self.invalid-character($screen-name)
+    }
+
+    method identity-by-name(::?CLASS:D: Str:D $name) {
+        if self.name-reservation -> $identity {
+            given $identity<identity-type> {
+                when User      { self.user-by-name($identity<name>) }
+                when Persona   { self.persona-by-name($identity<name>) }
+                when Character { self.character-by-name($identity<name>) }
+                default { die "Unknown identity type '{.^name}' in Identity table" }
+            }
+        }
     }
 }

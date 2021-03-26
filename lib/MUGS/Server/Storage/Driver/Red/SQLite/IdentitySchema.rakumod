@@ -13,6 +13,13 @@ my sub model-ref($model) {
 
 # XXXX: Created (Datetime .= now), deleted, enabled, updated, desc ...
 
+model Identity is table<mugs_identities> is export {
+    has Int $.id            is id;
+    has Str $.deconfused    is column{ :unique };
+    has Str $.identity-type is column;
+    has Str $.name          is column;
+}
+
 model Account is table<mugs_accounts> does MUGS::Account is export {
     has Int $.id          is id;
     has     @.users       is relationship( *.account-id, model-ref('User')    );

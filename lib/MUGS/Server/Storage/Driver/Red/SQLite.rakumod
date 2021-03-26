@@ -36,7 +36,8 @@ class Identities
     # XXXX: What about schema updates?
     method create-tables() {
         # XXXX: Transaction wrap?
-        my @models = Account, User, Persona, Character, AuthorizedUser, Credential;
+        my @models = Identity, Account, User, Persona, Character,
+                     AuthorizedUser, Credential;
         .^create-table(:unless-exists) for @models;
     }
 
@@ -122,12 +123,15 @@ class Identities
     }
 
     method new-user(::?CLASS:D: Str:D :$username!, Account:D :$account!) {
+        self.reserve-name(User, $username);
         User.^create(:$username, :$account);
     }
     method new-persona(::?CLASS:D: Str:D :$screen-name!, Account:D :$account!) {
+        self.reserve-name(Persona, $screen-name);
         Persona.^create(:$screen-name, :$account);
     }
     method new-character(::?CLASS:D: Str:D :$screen-name!, Persona:D :$persona!) {
+        self.reserve-name(Character, $screen-name);
         Character.^create(:$screen-name, :$persona);
     }
 
@@ -140,6 +144,30 @@ class Identities
     }
     method character-by-name(::?CLASS:D: Str:D $screen-name) {
         Character.^load(:$screen-name)
+    }
+    method identity-by-name(::?CLASS:D: Str:D $name) {
+        if self.name-reservation -> $identity {
+            given $identity.identity-type {
+                when 'User'      { self.user-by-name($identity.name) }
+                when 'Persona'   { self.persona-by-name($identity.name) }
+                when 'Character' { self.character-by-name($identity.name) }
+                default { die "Unknown identity type '$_' in Identity table" }
+            }
+        }
+    }
+
+
+    # De-confusion: Namespace folding and reservation
+    method name-reservation(::?CLASS:D: Str:D $name) {
+        my $deconfused = self.fold-name($name);
+        Identity.^load(:$deconfused)
+    }
+    method name-reserved(::?CLASS:D: Str:D $name) {
+        self.name-reservation.so;
+    }
+    method reserve-name(::?CLASS:D: MUGS::Identity:U $identity-type, Str:D $name) {
+        my $deconfused = self.fold-name($name);
+        Identity.^create(:$deconfused, :$name, :identity-type($identity-type.^name))
     }
 
 

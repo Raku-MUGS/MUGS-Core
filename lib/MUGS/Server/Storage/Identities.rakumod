@@ -13,9 +13,21 @@ role MUGS::Server::Storage::Identities {
     method new-character(::?CLASS:D: Str:D :$screen-name!, MUGS::Persona:D :$persona!) { ... }
 
     # Read: Point queries by unique keys
+    method identity-by-name(::?CLASS:D: Str:D $name) { ... }
     method user-by-name(::?CLASS:D: Str:D $username) { ... }
     method persona-by-name(::?CLASS:D: Str:D $screen-name) { ... }
     method character-by-name(::?CLASS:D: Str:D $screen-name) { ... }
+
+    # De-confusion: Namespace folding and reservation
+    method name-reserved(::?CLASS:D: Str:D $name) { ... }
+    method reserve-name(::?CLASS:D: MUGS::Identity:U $identity-type, Str:D $name) { ... }
+    method fold-name(Str:D $name) {
+        # Unified identity name de-confusion folding algorithm
+        my $stripped   = $name.trim.subst(/\s+/, ' ', :g);
+        my $unmarked   = $stripped.samemark(' ');
+        my $compatible = $unmarked.NFKD.Str;
+        my $folded     = $compatible.fc;
+    }
 
     # Exception helpers
     method invalid-username(Str:D $username) {
