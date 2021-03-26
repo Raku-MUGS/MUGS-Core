@@ -41,7 +41,7 @@ class MUGS::Universe::Admin is MUGS::Universe {
 
     #| Create the universe DB and its schema
     method create-db() {
-        $.identity-store.create-tables;
+        $.identity-store.schema-bootstrap;
     }
 
     #| Create the base admin account, and its owning meta-admin user

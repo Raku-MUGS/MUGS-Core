@@ -61,7 +61,7 @@ sub create-stub-mugs-server(Bool:D :$include-default-user = False,
             # $identity-store = ::($driver).WHO<Identities>.new(:database('mugs-user.sqlite3'));
             $identity-store   = ::($driver).WHO<Identities>.new;
             $credential-store = $identity-store;
-            $identity-store.create-tables;
+            $identity-store.schema-bootstrap;
         }
         default {
             die "Unknown storage driver '$storage-driver'";
