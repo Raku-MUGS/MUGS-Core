@@ -41,6 +41,79 @@ class Identities
     }
 
 
+    ### SCHEMA MANAGEMENT
+
+    method schema-expected-version() { 1 }
+
+    method schema-table-def(::?CLASS:D: Str:D $table-name) {
+        # NOTE: I'd prefer to use sqlite_schema here, but not all sqlite
+        #       versions in common use support it
+        my $sth = $!dbh.execute('SELECT * FROM sqlite_master WHERE type="table" AND name=?;',
+                                $table-name);
+        my %def = $sth.row(:hash);
+    }
+
+    method schema-version(::?CLASS:D:) {
+        # First, check if there is even a mugs_schema_state table at all
+        my $found = self.schema-table-def('mugs_schema_state');
+        return %( :version(0), :state<no-state-table> ) unless $found;
+
+        # Next, introspect mugs_schema_state to figure out current schema version
+        my $sth = $!dbh.prepare('SELECT value FROM mugs_schema_state WHERE key=?;');
+        my ($meta_ver) = $sth.execute('schema_state_version').row;
+        return %( :version(0), :state<no-state-version> ) unless $meta_ver;
+        return %( :version(0), :state<unknown> )          unless $meta_ver == 1;
+
+        my ($version) = $sth.execute('schema_version').row;
+        return %( :version(0), :state<no-schema-version> ) unless $version;
+        $version = +$version;
+
+        my ($state) = $sth.execute('schema_state').row;
+        return %( :$version, :state<no-state> ) unless $state;
+
+        %( :$version, :$state );
+    }
+
+    method schema-change-state(::?CLASS:D: :$old-state, :$new-state) {
+        $!dbh.execute(q:to/UPDATE_STATE/, $new-state, $old-state);
+            UPDATE mugs_schema_state SET value=?
+            WHERE  key="schema_state" AND value=?
+            UPDATE_STATE
+    }
+
+    method schema-bootstrap(::?CLASS:D:) {
+        # Bootstrap or fix broken bootstrap
+        $!dbh.execute(q:to/CREATE_TABLE/);
+            CREATE TABLE IF NOT EXISTS mugs_schema_state (
+                id    integer      NOT NULL primary key,
+                key   varchar(255) NOT NULL,
+                value varchar(255) NOT NULL,
+                UNIQUE (key)
+            );
+            CREATE_TABLE
+
+        my $sth = $!dbh.prepare(q:to/INSERT_OR_IGNORE/);
+            INSERT OR IGNORE INTO mugs_schema_state
+            (key, value)
+            VALUES (?,?);
+            INSERT_OR_IGNORE
+        $sth.execute('schema_state_version', '1');
+        $sth.execute('schema_version',       '1');
+        $sth.execute('schema_state',         'bootstrapping');
+
+        self.create-tables;
+        self.schema-change-state(:old-state('bootstrapping'),
+                                 :new-state('ready'));
+    }
+
+    method schema-update(::?CLASS:D:) {
+        my %schema-info = self.schema-version;
+        given %schema-info<version> {
+            when 0 { self.schema-bootstrap }
+        }
+    }
+
+
     ### IDENTITIES
 
     # Create: New identities
