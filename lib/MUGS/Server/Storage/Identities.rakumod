@@ -5,7 +5,8 @@ use MUGS::Identity;
 
 
 #| Identity storage for a server
-role MUGS::Server::Storage::Identities {
+role MUGS::Server::Storage::Identities
+does MUGS::Identity::NameFolding {
     # Create: New identities
     method new-account(::?CLASS:D:) { ... }
     method new-user(::?CLASS:D: Str:D :$username!, MUGS::Account:D :$account!) { ... }
@@ -18,16 +19,9 @@ role MUGS::Server::Storage::Identities {
     method persona-by-name(::?CLASS:D: Str:D $screen-name) { ... }
     method character-by-name(::?CLASS:D: Str:D $screen-name) { ... }
 
-    # De-confusion: Namespace folding and reservation
+    # Namespace reservation (in a unified folded/deconfused namespace)
     method name-reserved(::?CLASS:D: Str:D $name) { ... }
     method reserve-name(::?CLASS:D: MUGS::Identity:U $identity-type, Str:D $name) { ... }
-    method fold-name(Str:D $name) {
-        # Unified identity name de-confusion folding algorithm
-        my $stripped   = $name.trim.subst(/\s+/, ' ', :g);
-        my $unmarked   = $stripped.samemark(' ');
-        my $compatible = $unmarked.NFKD.Str;
-        my $folded     = $compatible.fc;
-    }
 
     # Exception helpers
     method invalid-username(Str:D $username) {
