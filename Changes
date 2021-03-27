@@ -4,6 +4,7 @@ Revision history for MUGS-Core
   [Identities]
   - All identity types now do MUGS::Identity role
   - Add identity name deconfusion and reservation
+  - Ensure new identity names are valid according to PRECIS-style ruleset
 
   [Universes]
   - Support schema versioning, meta-state, and introspection
