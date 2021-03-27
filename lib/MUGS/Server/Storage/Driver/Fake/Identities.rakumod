@@ -138,7 +138,7 @@ class Identities
     }
 
     method identity-by-name(::?CLASS:D: Str:D $name) {
-        if self.name-reservation -> $identity {
+        if self.name-reservation($name) -> $identity {
             given $identity<identity-type> {
                 when User      { self.user-by-name($identity<name>) }
                 when Persona   { self.persona-by-name($identity<name>) }
