@@ -123,14 +123,17 @@ class Identities
     }
 
     method new-user(::?CLASS:D: Str:D :$username!, Account:D :$account!) {
+        self.ensure-valid-username($username);
         self.reserve-name(User, $username);
         User.^create(:$username, :$account);
     }
     method new-persona(::?CLASS:D: Str:D :$screen-name!, Account:D :$account!) {
+        self.ensure-valid-persona-name($screen-name);
         self.reserve-name(Persona, $screen-name);
         Persona.^create(:$screen-name, :$account);
     }
     method new-character(::?CLASS:D: Str:D :$screen-name!, Persona:D :$persona!) {
+        self.ensure-valid-character-name($screen-name);
         self.reserve-name(Character, $screen-name);
         Character.^create(:$screen-name, :$persona);
     }

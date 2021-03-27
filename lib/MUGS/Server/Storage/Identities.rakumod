@@ -33,4 +33,13 @@ does MUGS::Identity::NameFolding {
     method invalid-character(Str:D $screen-name) {
         X::MUGS::Message::InvalidEntity.new(:type('character'), :id($screen-name)).throw;
     }
+    method ensure-valid-username(Str:D $username) {
+        self.invalid-username($username) unless self.is-valid-username($username);
+    }
+    method ensure-valid-persona-name(Str:D $screen-name) {
+        self.invalid-persona($screen-name) unless self.is-valid-screen-name($screen-name);
+    }
+    method ensure-valid-character-name(Str:D $screen-name) {
+        self.invalid-character($screen-name) unless self.is-valid-screen-name($screen-name);
+    }
 }

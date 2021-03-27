@@ -805,7 +805,6 @@ class MUGS::Server
 
     multi method create-account-owner(::?CLASS:D: Str:D :$username!,
                                       MUGS::Authentication::Credential:D :$credential!) {
-        # XXXX: Enforce \w+ for usernames
         # XXXX: Detect failure to create account or user
         my $account = $!identity-store.new-account;
         my $user    = $!identity-store.new-user(:$username, :$account);

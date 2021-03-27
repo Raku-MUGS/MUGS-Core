@@ -105,6 +105,7 @@ class Identities
     }
 
     method new-user(::?CLASS:D: Str:D :$username!, MUGS::Account:D :$account!) {
+        self.ensure-valid-username($username);
         self.reserve-name(Account, $username);
         my $user = User.new(:$username, :$account);
         $account.add-user($user);
@@ -112,6 +113,7 @@ class Identities
     }
 
     method new-persona(::?CLASS:D: Str:D :$screen-name!, MUGS::Account:D :$account!) {
+        self.ensure-valid-persona-name($screen-name);
         self.reserve-name(Persona, $screen-name);
         my $persona = Persona.new(:$screen-name);
         $account.add-persona($persona);
@@ -119,6 +121,7 @@ class Identities
     }
 
     method new-character(::?CLASS:D: Str:D :$screen-name!, MUGS::Persona:D :$persona!) {
+        self.ensure-valid-character-name($screen-name);
         self.reserve-name(Character, $screen-name);
         my $character = Character.new(:$screen-name, :$persona);
         $persona.add-character($character);
