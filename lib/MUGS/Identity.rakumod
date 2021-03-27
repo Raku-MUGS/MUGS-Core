@@ -92,7 +92,8 @@ role MUGS::Identity::NameFolding {
 
     #| Determine if a name is baseline valid (mostly PRECIS rules),
     #| before any additional restrictions based on use case
-    method is-valid-name(Str:D $name, Bool:D $id = False --> Bool:D) {
+    method is-valid-name(Str:D $name, Bool:D $id = False,
+                         UInt:D $max-chars = 63 --> Bool:D) {
         # Codepoint category sets
         my constant $old-hangul-jamo     = < L V T >.Set;
         my constant $control             = < Cc Cf >.Set;
@@ -146,6 +147,10 @@ role MUGS::Identity::NameFolding {
         # 4 foldings reach full stability, and folded result is non-empty
         my $folded = self.fold-name($name);
         return False unless $folded && $folded eq self.fold-name-once($folded);
+
+        # Reasonable length
+        return False if $folded.chars > $max-chars
+                     || $name.chars   > $max-chars;
 
         True;
     }
