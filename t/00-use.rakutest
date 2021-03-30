@@ -53,10 +53,12 @@ use MUGS::App::Releaser Empty;
 use MUGS::Server::Game::Lobby;
 use MUGS::Server::Genre::Test;
 use MUGS::Server::Game::Echo;
+use MUGS::Server::Game::Error;
 
 use MUGS::Client::Game::Lobby;
 use MUGS::Client::Genre::Test;
 use MUGS::Client::Game::Echo;
+use MUGS::Client::Game::Error;
 
 
 pass "all modules loaded successfully";
