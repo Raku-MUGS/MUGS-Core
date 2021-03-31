@@ -1,0 +1,110 @@
+use Test;
+
+use MUGS::Core;
+use MUGS::Client::Game::Error;
+use MUGS::App::LocalUI;
+
+plan 28;
+
+
+### STUB UI CLASSES
+
+my class TestApp is MUGS::App::LocalUI {
+    method ui-type { 'test' }
+
+    #| Connect to server and authenticate as a valid user
+    method ensure-authenticated-session(Str $server, Str $universe) {
+        my $decoded = self.decode-server($server);
+
+        # Try to connect, bailing out if unable to do so
+        (my $session = TRY { self.connect($decoded<url> // $decoded<server>, $universe) })
+            or self.exit-with-errors("Unable to connect to MUGS server '$decoded<server>':", [$!]);
+
+        my $username  = $decoded<username>
+                     || $.config.value('Servers', $decoded<server>, 'user');
+        my $password  = $.config.value('Servers', $decoded<server>, 'pass') // '';
+
+        if $password.defined && $username {
+            # Attempt authentication using current username and password
+            try await $session.authenticate(:$username, :$password);
+            die unless $session.username;
+        }
+    }
+}
+
+
+my class ErrorUI is MUGS::UI::Game {
+    method ui-type   { 'test'  }
+    method game-type { 'error' }
+
+    method show-initial-state { }
+}
+
+
+### BASIC SETUP
+
+lives-ok { ErrorUI.register }, 'Able to register ErrorUI';
+
+my $app-ui;
+lives-ok { $app-ui = TestApp.new }, 'Able to construct TestApp';
+isa-ok $app-ui, MUGS::App::LocalUI:D;
+nok    $app-ui.config,  'No config yet';
+nok    $app-ui.session, 'No session yet';
+
+lives-ok { $app-ui.initialize }, 'Able to initialize TestApp';
+ok     $app-ui.config, 'Config loaded now';
+isa-ok $app-ui.config, MUGS::Util::Config:D;
+
+lives-ok { $app-ui.ensure-authenticated-session(Str, Str) },
+         'Able to set up an authenticated session';
+ok     $app-ui.session, 'Session running now';
+isa-ok $app-ui.session, MUGS::Client::Session:D;
+is     $app-ui.session.username, 'default-user', 'Authenticated as default-user';
+nok    $app-ui.session.default-persona,   'No default-persona yet';
+nok    $app-ui.session.default-character, 'No default-character yet';
+
+lives-ok { $app-ui.choose-identities }, 'Able to choose identities';
+is $app-ui.session.default-persona,   'Default Persona',   'Default persona now set';
+is $app-ui.session.default-character, 'Default Character', 'Default character now set';
+
+my $game-type = 'error';
+my $client;
+lives-ok { $client = $app-ui.new-game-client(:$game-type) },
+         "Can launch the $game-type game client and join it";
+ok     $client, 'Game client set';
+isa-ok $client, MUGS::Client::Game:D;
+
+lives-ok { $app-ui.launch-game-ui(:$game-type, :$client) },
+         'Can launch the game UI';
+
+
+### SYNCHRONOUS ERROR TESTING
+
+throws-like { $client.send-non-request-via-connection },
+            X::TypeCheck::Binding::Parameter,
+            'Exception sending non-request via raw connection';
+
+throws-like { $client.send-non-request-via-session },
+            X::TypeCheck::Binding::Parameter,
+            'Exception sending non-request via session';
+
+
+### ASYNC ERROR TESTING
+
+throws-like { await $client.send-unknown-action-type }, X::MUGS::Response::InvalidRequest,
+            'A request with an unknown action type is an InvalidRequest';
+
+throws-like { await $client.send-missing-error-type }, X::MUGS::Response::InvalidRequest,
+            'A request missing required data is an InvalidRequest';
+
+throws-like { await $client.send-error-request(Str) }, X::MUGS::Response::InvalidRequest,
+            'A request with type object data is an InvalidRequest';
+
+
+### SHUTDOWN
+
+lives-ok { $app-ui.shutdown }, 'Can shut down TestApp';
+nok $app-ui.session, 'Session is now gone';
+
+
+done-testing;
