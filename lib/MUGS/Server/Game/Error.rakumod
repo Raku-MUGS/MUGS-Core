@@ -15,13 +15,15 @@ class MUGS::Server::Game::Error is MUGS::Server::Genre::Test {
         callsame;
 
         X::MUGS::Request::AdHoc.new(message => "Message missing").throw
-            if $action<type> eq 'error' && !$action<error>.defined;
+            if $action<type> eq 'error' && !$action<error>;
     }
 
     method process-action-error(::?CLASS:D: MUGS::Character:D :$character!, :$action!) {
         given $action<error> {
+            when '' {
+            }
             default {
-                X::MUGS::Request.new.throw
+                X::MUGS::Request::AdHoc.new(message => "Unrecognized error request").throw
             }
         }
         # hash(:echo($action<message>))
