@@ -132,7 +132,7 @@ role MUGS::Identity::NameFolding {
             return False if $category ∈ $control;
 
             # Reject compatible-mapped characters
-            return False if $ord.chr.NFKC.ords.join(' ') ne $ord;
+            return False if $ord.chr.NFKC.list.join(' ') ne $ord;
 
             # Allow LetterDigits that have made it this far
             next if $category ∈ $letter-digits;
