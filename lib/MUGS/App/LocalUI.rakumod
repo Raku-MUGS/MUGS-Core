@@ -25,7 +25,9 @@ class MUGS::App::LocalUI {
     has Bool $.is-win;
     has @.user-languages;
 
-    method ui-type() { ... }
+    method ui-type()           { ... }
+    method play-current-game() { ... }
+    method ensure-authenticated-session(Str $server, Str $universe) { ... }
 
 
     #| Initialize the overall MUGS client app

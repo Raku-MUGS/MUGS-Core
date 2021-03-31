@@ -16,8 +16,9 @@ class MUGS::UI::Game {
     has $.app-ui;                                   #= Parent UI application
 
     # MUST be implemented by each base UI or leaf game class, respectively
-    method ui-type()    { ... }
-    method game-type()  { ... }
+    method ui-type()            { ... }
+    method game-type()          { ... }
+    method show-initial-state() { ... }
 
     # CAN be extended for UI- or game-specific details
     method initialize()            { }  #= Game UI first launched
