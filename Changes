@@ -1,11 +1,18 @@
 Revision history for MUGS-Core
 
 0.1.1  *WIP*
+  [Bug fixes]
+  - Stub more required MUGS::App::LocalUI and MUGS::UI::Game methods
+
   [Identities]
   - All identity types now do MUGS::Identity role
   - Add identity name deconfusion and reservation
   - Identity names ensured valid according to PRECIS-style ruleset
   - Identity names limited to 63 characters
+
+  [Testing]
+  - Add Error test 'game', designed to generate errors in specific ways
+  - Add initial tests for Error 'game'
 
   [Universes]
   - Support schema versioning, meta-state, and introspection
