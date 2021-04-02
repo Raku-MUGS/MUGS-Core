@@ -38,6 +38,8 @@ class MUGS::Client::Game {
     has Str:D                   $.character-name is required;
     has                         %.initial-state  is required;
     has                         &.on-push        is rw;
+    has GameState               $.gamestate;
+
 
     # MUST be implemented in leaf game classes
     method game-type() { ... }
@@ -60,6 +62,7 @@ class MUGS::Client::Game {
     method fix-standard-enum-fields(%data) {
         with %data<gamestate> {
             %data<gamestate> = GameState::{$_} unless $_ ~~ GameState;
+            $!gamestate      = %data<gamestate>;
         }
 
         with %data<winloss> {
