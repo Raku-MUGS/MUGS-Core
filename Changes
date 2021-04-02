@@ -4,11 +4,19 @@ Revision history for MUGS-Core
   [Bug fixes]
   - Stub more required MUGS::App::LocalUI and MUGS::UI::Game methods
 
+  [Clients]
+  - Record most recently seen gamestate in client (where UI can access it)
+
   [Identities]
   - All identity types now do MUGS::Identity role
   - Add identity name deconfusion and reservation
   - Identity names ensured valid according to PRECIS-style ruleset
   - Identity names limited to 63 characters
+
+  [Servers]
+  - Add a helper method for overriding a game config form default
+  - Add a hook for post-processing at the end of process-action,
+    just before returning the game status
 
   [Testing]
   - Add Error test 'game', designed to generate errors in specific ways
