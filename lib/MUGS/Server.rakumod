@@ -358,6 +358,7 @@ class MUGS::Server::Game {
         self.add-player-action-event(:$character, :$action);
 
         my $result = self."process-action-$action<type>"(:$character, :$action);
+        self.post-process-action(:$character, :$action, :$result);
         self.game-status($result);
     }
 
@@ -373,6 +374,11 @@ class MUGS::Server::Game {
 
     method process-action-nop(::?CLASS:D: MUGS::Character:D :$character!, :$action!) {
         Empty
+    }
+
+    method post-process-action(::?CLASS:D: MUGS::Character:D :$character!,
+                               :$action!, :$result!) {
+        # Intentionally empty; just providing a hook
     }
 
     method initial-state(::?CLASS:D:) {
