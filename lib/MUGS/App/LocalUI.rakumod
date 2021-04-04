@@ -6,6 +6,7 @@ use MUGS::Util::Config;
 use MUGS::Client;
 use MUGS::Client::Connection::Supplier;
 use MUGS::Client::Connection::WebSocket;
+use MUGS::Client::Game::Lobby;
 
 use MUGS::Server::Universe;
 use MUGS::Server::Stub;
@@ -18,8 +19,9 @@ use Cro::Uri;
 # XXXX: Needs better error handling throughout
 class MUGS::App::LocalUI {
     # XXXX: Currently only able to connect to one server at a time
-    has MUGS::Client::Session $.session;
-    has MUGS::Util::Config    $.config;
+    has MUGS::Client::Session     $.session;
+    has MUGS::Util::Config        $.config;
+    has MUGS::Client::Game::Lobby $.lobby-client;
 
     has Str  $.osname;
     has Bool $.is-win;
@@ -178,6 +180,11 @@ class MUGS::App::LocalUI {
         }
     }
 
+    #| Create a new (singleton) lobby client
+    method start-lobby-client() {
+        $!lobby-client = self.new-game-client(game-type => 'lobby');
+    }
+
     #| Create (if needed) and then join a game of the requested game-type
     method new-game-client(Str:D :$game-type, GameID :$game-id is copy, :%config) {
         # XXXX: What if the player provides *both* a $game-id and a %config?
@@ -226,6 +233,9 @@ sub play-via-local-ui(MUGS::App::LocalUI:U $app-ui-class,
 
     # Choose identities to use when creating and joining games
     $app-ui.choose-identities;
+
+    # Set up a lobby client
+    $app-ui.start-lobby-client;
 
     # Create (if needed) and then join a game of the requested game-type
     my $client = $app-ui.new-game-client(:$game-type, :$game-id, :%config);
