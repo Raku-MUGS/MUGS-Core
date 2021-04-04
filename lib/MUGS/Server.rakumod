@@ -879,19 +879,25 @@ class MUGS::Server
     }
 
     method get-info-active-games(::?CLASS:D: MUGS::User:D $user) {
-        # XXXX: Permissions to view games?
-        # XXXX: Game configs?
-        # XXXX: Game empty/full/joinable status?
-
         my @characters is Set = $user.available-personas.map(*.characters).flat;
-        my @active-games = %!game.kv.map: -> $game-id, $game {
+        my @active-games = %!game.kv.map: -> GameID() $game-id, $game {
             my $game-type           = $game.game-type;
+            my $gamestate           = $game.gamestate.Str;
             my $config              = $game.config;
             my $created-by-me       = $game.creator === $user;
-            my @participants is Set = $game.participants.map(*.character);
-            my @my-characters       = (@characters ∩ @participants).map(*.screen-name);
+            my $num-participants    = $game.participants.elems;
+            my @participants is Set = $game.participants.map(*<character>);
+            my @my-characters       = (@characters ∩ @participants).keys.map(*.screen-name);
 
-            hash(:$game-id, :$game-type, :$config, :$created-by-me, :@my-characters)
+            # Don't include private or finished games that user is not already
+            # associated with (the creator or controlling a joined character)
+            next unless $created-by-me || @my-characters
+                     || !$config<invites-only> && $game.gamestate < Finished;
+
+            # XXXX: Permissions to view games/configs/details?
+
+            hash(:$game-id, :$game-type, :$gamestate, :$config,
+                 :$created-by-me, :$num-participants, :@my-characters)
         }
     }
 

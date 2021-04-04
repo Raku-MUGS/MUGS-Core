@@ -329,11 +329,13 @@ class MUGS::Client::Session {
         constant $active-games =
         [
             {
-                game-id       => GameID,
-                game-type     => Str,
-                created-by-me => Bool,
-                my-characters => [ Str ],
-                config        => Map
+                game-id          => GameID,
+                game-type        => Str,
+                gamestate        => Str,
+                config           => Map,
+                num-participants => Int,
+                created-by-me    => Bool,
+                my-characters    => [ Str ],
             },
         ];
         constant %full-schema = :$available-identities,
