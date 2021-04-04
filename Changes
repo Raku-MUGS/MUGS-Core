@@ -6,6 +6,9 @@ Revision history for MUGS-Core
 
   [Clients]
   - Record most recently seen gamestate in client (where UI can access it)
+  - LocalUIs always create a Lobby client before any game UIs
+  - Improve Lobby client available game types list
+  - Add Lobby client active games list
 
   [Identities]
   - All identity types now do MUGS::Identity role
@@ -17,6 +20,7 @@ Revision history for MUGS-Core
   - Add a helper method for overriding a game config form default
   - Add a hook for post-processing at the end of process-action,
     just before returning the game status
+  - More details and better filtering in active-games info bundle
 
   [Testing]
   - Add Error test 'game', designed to generate errors in specific ways
