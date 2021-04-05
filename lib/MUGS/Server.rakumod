@@ -331,6 +331,16 @@ class MUGS::Server::Game {
                                                 :timestamp($!prev-time), |%extra);
         dd $event if $*DEBUG;
         @!events.push($event);
+
+        # GameCreated happens too early for clients to recognize the game;
+        # otherwise broadcast GameEvents to all participants.
+        unless $event-type == GameCreated {
+            my $type  = 'game-event';
+            my %data := hash(:game-id($.id), :event($event.to-struct));
+            for self.participants -> (:character($c), :$session, :$instance) {
+                $session.push(:$type, :%data);
+            }
+        }
     }
 
     method add-player-action-event(::?CLASS:D: MUGS::Character:D :$character!, :$action!) {
