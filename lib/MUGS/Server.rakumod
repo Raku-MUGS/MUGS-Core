@@ -879,15 +879,16 @@ class MUGS::Server
     }
 
     method get-info-active-games(::?CLASS:D: MUGS::User:D $user) {
-        my @characters is Set = $user.available-personas.map(*.characters).flat;
+        my @characters is Set = $user.available-personas.map(*.characters).flat.map(*.screen-name);
         my @active-games = %!game.kv.map: -> GameID() $game-id, $game {
             my $game-type           = $game.game-type;
             my $gamestate           = $game.gamestate.Str;
             my $config              = $game.config;
-            my $created-by-me       = $game.creator === $user;
+            my $created-by-me       = $game.creator === $user
+                                   || $game.creator.username eq $user.username;
             my $num-participants    = $game.participants.elems;
-            my @participants is Set = $game.participants.map(*<character>);
-            my @my-characters       = (@characters ∩ @participants).keys.map(*.screen-name);
+            my @participants is Set = $game.participants.map(*<character>.screen-name);
+            my @my-characters       = (@characters ∩ @participants).keys;
 
             # Don't include private or finished games that user is not already
             # associated with (the creator or controlling a joined character)
