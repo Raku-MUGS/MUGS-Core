@@ -21,11 +21,11 @@ class MUGS::UI::Game {
     method show-initial-state() { ... }
 
     # CAN be extended for UI- or game-specific details
-    method initialize()            { }  #= Game UI first launched
-    method activate()              { }  #= Game UI activated/switched to
-    method deactivate()            { }  #= Game UI backgrounded
-    method shutdown()              { }  #= Game UI about to be torn down
-    method handle-server-message() { }  #= Called with each server-pushed message
+    method initialize() { self.client.flush-startup-messages }  #= Game UI first launched
+    method activate()               { }  #= Game UI activated/switched to
+    method deactivate()             { }  #= Game UI backgrounded
+    method shutdown()               { }  #= Game UI about to be torn down
+    method handle-server-message($) { }  #= Called with each server-pushed message
 
 
     submethod TWEAK() {

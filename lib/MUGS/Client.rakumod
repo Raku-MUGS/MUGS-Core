@@ -70,6 +70,10 @@ class MUGS::Client::Game {
         }
     }
 
+    method flush-startup-messages(::?CLASS:D:) {
+        $.session.flush-startup-messages(self);
+    }
+
     method handle-server-message($message) {
         if $message.type eq 'game-update' {
             self.canonify-push-update($message);
@@ -165,6 +169,7 @@ class MUGS::Client::Session {
     has Str                        $.default-character is rw;
     has MUGS::Client::Game:D       %.games;
     has MUGS::Message::Request:D   %.pending;
+    has                            %.startup;
 
     #| Check if a game client is active in this session
     method client-is-active(MUGS::Client::Game:D $client) {
@@ -265,9 +270,9 @@ class MUGS::Client::Session {
     #| Handle server-push messages
     multi method handle-server-message(MUGS::Message::Push:D $message) {
         with $message.data<game-id> {
-            my $game = %!games{$_}
-                or X::MUGS::Message::InvalidEntity.new(:type<game>, :id($_)).throw;
-            $game.handle-server-message($message);
+            with   %!games{$_}   { .handle-server-message($message) }
+            orwith %!startup{$_} { .push($message) }
+            else { X::MUGS::Message::InvalidEntity.new(:type<game>, :id($_)).throw }
         }
         else {
             !!! "Don't yet know how to handle non-game push messages"
@@ -366,10 +371,15 @@ class MUGS::Client::Session {
                     :%config --> Promise:D) {
         X::MUGS::Client::PersonaRequired.new.throw unless $creator-persona-name;
 
-        constant %schema = game-id => GameID;
+        my sub on-success($response) {
+            constant %schema = game-id => GameID;
+            my $game-id = $response.validated-data(%schema)<game-id>;
+            %.startup{$game-id} //= [];
+            $game-id
+        }
 
         my %data := hash(:$game-type, :%config, :$creator-persona-name);
-        self!response-promise('new-game', %data, *.validated-data(%schema)<game-id>);
+        self!response-promise('new-game', %data, &on-success);
     }
 
     method join-game(::?CLASS:D: Str:D :$game-type where { MUGS::Client.implementation-exists($_) },
@@ -386,8 +396,15 @@ class MUGS::Client::Session {
             %!games{$game-id} = $client;
         }
 
+        %.startup{$game-id} //= [];
         my %data := hash(:$game-type, :$game-id, :$character-name);
         self!response-promise('join-game', %data, &on-success);
+    }
+
+    method flush-startup-messages(::?CLASS:D: MUGS::Client::Game:D $game) {
+        my $game-id = $game.game-id;
+        %!games{$game-id}.handle-server-message($_) for @(%!startup{$game-id});
+        %!startup{$game-id}:delete;
     }
 
     multi method leave-game(::?CLASS:D: MUGS::Client::Game:D $game --> Promise:D) {
