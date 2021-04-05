@@ -326,7 +326,8 @@ class MUGS::Server::Game {
     }
 
     method add-player-action-event(::?CLASS:D: MUGS::Character:D :$character!, :$action!) {
-        self.add-event(CharacterAction, :$character, :data($action));
+        self.add-event(CharacterAction, :$character, :data($action))
+            unless $action<type> eq 'nop';
     }
 
     method set-gamestate(::?CLASS:D: GameState:D $new-state) {
