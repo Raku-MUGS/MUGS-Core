@@ -81,6 +81,14 @@ class MUGS::Server::GameEvent {
     has MUGS::User      $.user;
     has MUGS::Character $.character;
     has                 %.data;
+
+    method to-struct(::?CLASS:D: --> Hash) {
+        my $timestamp = $.timestamp.Rat;
+        my $game-time = $.game-time.Rat;
+
+        { :$.id, :$timestamp, :$game-time, :$.event-type, :%.data,
+          |(:character-name($.character.screen-name) if $.character) }
+    }
 }
 
 
