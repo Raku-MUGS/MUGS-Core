@@ -200,7 +200,6 @@ class MUGS::App::LocalUI {
         my $game-ui       = $game-ui-class.new(:$client, :app-ui(self), |%ui-opts);
 
         $game-ui.initialize;
-        $game-ui.show-initial-state;
         $game-ui
     }
 }
