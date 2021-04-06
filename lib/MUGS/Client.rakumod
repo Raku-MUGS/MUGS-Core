@@ -56,7 +56,7 @@ class MUGS::Client::Game {
 
     # SHOULD be extended in genre or leaf game classes
     method canonify-push-update($pushed) {
-        self.fix-standard-enum-fields($pushed.data<update>);
+        self.fix-standard-enum-fields($pushed.data);
     }
 
     method fix-standard-enum-fields(%data) {

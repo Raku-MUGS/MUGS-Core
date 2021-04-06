@@ -769,7 +769,7 @@ class MUGS::Server::Session {
 
     method push-game-update(GameID:D :$game-id!, MUGS::Character:D :$character!,
                             :%update!) {
-        my %data := hash(:$game-id, :%update, :character-name($character.screen-name));
+        my %data := hash(|%update, :$game-id, :character-name($character.screen-name));
         self.push(:type<game-update>, :%data);
     }
 
