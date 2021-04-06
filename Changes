@@ -3,12 +3,14 @@ Revision history for MUGS-Core
 0.1.1  *WIP*
   [Bug fixes]
   - Stub more required MUGS::App::LocalUI and MUGS::UI::Game methods
+  - Don't record nop actions as game events
 
   [Clients]
   - Record most recently seen gamestate in client (where UI can access it)
   - LocalUIs always create a Lobby client before any game UIs
   - Improve Lobby client available game types list
   - Add Lobby client active games list
+  - Track and handle game startup push messages
 
   [Identities]
   - All identity types now do MUGS::Identity role
@@ -21,6 +23,9 @@ Revision history for MUGS-Core
   - Add a hook for post-processing at the end of process-action,
     just before returning the game status
   - More details and better filtering in active-games info bundle
+  - Define serialization for MUGS::Server::GameEvent
+  - Send serialized game events to all participants
+  - Flatten %update into game-update %data to improve message format consistency
 
   [Testing]
   - Add Error test 'game', designed to generate errors in specific ways
