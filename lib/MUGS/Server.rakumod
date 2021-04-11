@@ -233,7 +233,7 @@ class MUGS::Server::Game {
 
     method start-dispatcher(::?CLASS:D:) {
         start react whenever $!input -> $ (:key($session), :value($request)) {
-                self.dispatch-request($session, $request);
+            self.dispatch-request($session, $request);
         }
     }
 
