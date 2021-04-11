@@ -343,7 +343,8 @@ class MUGS::Server::Game {
         }
     }
 
-    method add-player-action-event(::?CLASS:D: MUGS::Character:D :$character!, :$action!) {
+    method add-character-action-event(::?CLASS:D: MUGS::Character:D :$character!,
+                                      :$action!) {
         self.add-event(CharacterAction, :$character, :data($action))
             unless $action<type> eq 'nop';
     }
@@ -374,7 +375,7 @@ class MUGS::Server::Game {
 
     method process-action(::?CLASS:D: MUGS::Character:D :$character!, :$action!) {
         self.ensure-action-valid(:$character, :$action);
-        self.add-player-action-event(:$character, :$action);
+        self.add-character-action-event(:$character, :$action);
 
         my $result = self."process-action-$action<type>"(:$character, :$action);
         self.post-process-action(:$character, :$action, :$result);

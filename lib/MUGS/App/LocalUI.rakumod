@@ -189,7 +189,7 @@ class MUGS::App::LocalUI {
     method new-game-client(Str:D :$game-type, GameID :$game-id is copy, :%config) {
         # XXXX: What if the player provides *both* a $game-id and a %config?
         # XXXX: Turn this into a promise chain
-        # XXXX: What if the server can't create the game, or the player can't join?
+        # XXXX: What if the server can't create the game, or the character can't join?
         $game-id   ||= await $!session.new-game(:$game-type, :%config);
         my $client   = await $!session.join-game(:$game-type, :$game-id);
     }
