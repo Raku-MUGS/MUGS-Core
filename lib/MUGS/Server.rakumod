@@ -476,13 +476,12 @@ class MUGS::Server::Game {
         my %data = new-count => %!participant.elems;
         self.add-event(CharacterJoined, :$character, :%data);
 
-        self.maybe-start-game;
+        self.start-game if self.ready-to-start-game;
     }
 
-    method maybe-start-game(::?CLASS:D:) {
-        self.start-game
-            if $!gamestate == NotStarted
-            && %.participant.elems >= %.config<start-players>;
+    method ready-to-start-game(::?CLASS:D: --> Bool:D) {
+           $!gamestate == NotStarted
+        && %.participant.elems >= %.config<start-players>
     }
 
     method start-game(::?CLASS:D:) {
@@ -496,13 +495,12 @@ class MUGS::Server::Game {
         my %data = new-count => %!participant.elems;
         self.add-event(CharacterLeft, :$character, :%data);
 
-        self.maybe-stop-game;
+        self.stop-game(Abandoned) if self.game-abandoned;
     }
 
-    method maybe-stop-game(::?CLASS:D:) {
-        self.stop-game(Abandoned)
-            if $!gamestate < Finished
-            && %.participant.elems < %.config<min-players>;
+    method game-abandoned(::?CLASS:D: --> Bool:D) {
+           $!gamestate < Finished
+        && %.participant.elems < %.config<min-players>
     }
 
     method stop-game(::?CLASS:D: GameState $new-state) {
