@@ -178,16 +178,8 @@ class MUGS::Server::Game {
         ]
     }
 
-    method change-config-default(:$form, Str:D :$field, :$default) {
-        my $field-def = $form.first(*<field> eq $field)
-            or die "No such config field '$field'";
-        die "Proposed new default ({$default.raku}) for config field '$field' does not match config field type '{$field-def<type>.^name}'"
-            unless $default ~~ $field-def<type>;
-        $field-def<default> = $default;
-    }
 
     # Most game implementations will NOT override these
-
     method register() {
         MUGS::Server.register-implementation(self.game-type, self.WHAT);
     }
@@ -202,6 +194,14 @@ class MUGS::Server::Game {
 
         my %data = :game-type(self.game-type), :game-id($!id);
         self.add-event(GameCreated, :user($!creator), :%data);
+    }
+
+    method change-config-default(:$form, Str:D :$field, :$default) {
+        my $field-def = $form.first(*<field> eq $field)
+            or die "No such config field '$field'";
+        die "Proposed new default ({$default.raku}) for config field '$field' does not match config field type '{$field-def<type>.^name}'"
+            unless $default ~~ $field-def<type>;
+        $field-def<default> = $default;
     }
 
     method ensure-valid-config(%config) {
