@@ -231,7 +231,7 @@ class MUGS::Server::Game {
         }
     }
 
-    method start(::?CLASS:D:) {
+    method start-dispatcher(::?CLASS:D:) {
         start react whenever $!input -> $ (:key($session), :value($request)) {
                 self.dispatch-request($session, $request);
         }
@@ -950,7 +950,7 @@ class MUGS::Server
     method new-game(::?CLASS:D: MUGS::User:D :$creator!, Str:D :$game-type!, :%config!) {
         self!ensure-game-type-exists($game-type);
         my $game = self.implementation-class($game-type).new(:$creator, :%config, :server(self));
-        $game.start;
+        $game.start-dispatcher;
         %!game{$game.id} = $game;
         MUGS::Server::LogTimelineSchema::GameCreated.log(:$game-type, :game-id($game.id), :creator($creator.username));
         $game.id;
