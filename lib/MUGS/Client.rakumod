@@ -65,9 +65,18 @@ class MUGS::Client::Game {
             $!gamestate      = %data<gamestate>;
         }
 
-        with %data<winloss> {
-            %data<winloss>   = WinLoss::{$_}   unless $_ ~~ WinLoss;
+        if %data<winloss> ~~ Map:D {
+            for %data<winloss>.kv -> $identity, $winloss {
+                %data<winloss>{$identity} = WinLoss::{$winloss}
+                    unless $winloss ~~ WinLoss;
+            }
         }
+    }
+
+    method my-winloss(::?CLASS:D: $response) {
+        my %schema   = winloss => Map;
+        my %winloss := $response.validated-data(%schema)<winloss>;
+        my $winloss  = %winloss{$.character-name} // %winloss{''} // Undecided;
     }
 
     method flush-startup-messages(::?CLASS:D:) {

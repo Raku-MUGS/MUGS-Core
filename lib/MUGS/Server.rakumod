@@ -96,7 +96,6 @@ class MUGS::Server::GameEvent {
 class MUGS::Server::Game {
     has                $.id        = NEXT-ID;
     has GameState:D    $.gamestate = NotStarted;
-    has WinLoss:D      $.winloss   = Undecided;
     has Instant:D      $.prev-time = now;
     has Real:D         $.game-time = 0.0;
     has Channel        $.input    .= new;
@@ -104,6 +103,7 @@ class MUGS::Server::Game {
     has MUGS::User:D   $.creator   is required;
 
     has Map:D                     %.participant;
+    has WinLoss:D                 %.winloss;
     has                           %.config;
     has MUGS::Server::GameEvent:D @.events;
 
@@ -366,11 +366,11 @@ class MUGS::Server::Game {
         $!gamestate = $new-state;
     }
 
-    method set-winloss(::?CLASS:D: WinLoss:D $new-winloss) {
+    method set-winloss(::?CLASS:D: WinLoss:D $new-winloss, MUGS::Identity $identity?) {
         self.update-time;
 
-        $!winloss = $new-winloss;
-        self.set-gamestate(Finished) if $!winloss;
+        %!winloss{$identity // ''} = $new-winloss;
+        self.set-gamestate(Finished) if %!winloss{''};
     }
 
     method process-action(::?CLASS:D: MUGS::Character:D :$character!, :$action!) {
@@ -406,7 +406,7 @@ class MUGS::Server::Game {
     }
 
     method game-status(::?CLASS:D: $action-result) {
-        hash(:$.gamestate, :$.winloss, |$action-result);
+        hash(:$.gamestate, :%.winloss, |$action-result);
     }
 
     method broadcast-to-game(::?CLASS:D: MUGS::Character:D :$sender!,
