@@ -615,6 +615,8 @@ class MUGS::Server::Session {
                 # exception to the CATCH block above
                 auth-error unless $user && $user ~~ MUGS::User;
 
+                $.connection.debug-name = $username;
+
                 self.success({}, $request.id)
             }
             when 'create-account-owner' {
@@ -649,7 +651,9 @@ class MUGS::Server::Session {
                 return self.error(RequestError, "Cannot create user '$username'", $request.id)
                     unless $user && $user ~~ MUGS::User;
 
+                $.connection.debug-name = $username;
                 $!user = $user;
+
                 self.success({}, $request.id)
             }
             when 'get-info-bundle' {

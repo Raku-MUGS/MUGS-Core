@@ -27,6 +27,8 @@ role MUGS::Client::Connection {
 #| An abstraction for the SERVER side of a client-server connection, hiding
 #| details of wire protocol, serialization, compression, encryption, etc.
 role MUGS::Server::Connection {
+    has $.debug-name is rw = '<unnamed>';
+
     method disconnect()                             { ... }
     method send-to-client(MUGS::Message:D $message) { ... }
     method from-client-supply()                     { ... }
