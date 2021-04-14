@@ -33,6 +33,8 @@ role MUGS::User does MUGS::Identity {
 role MUGS::Character does MUGS::Identity {
     method screen-name { ... }
     method persona     { ... }
+
+    method Str(::?CLASS:D:) { $.screen-name }
 }
 
 
@@ -48,6 +50,8 @@ role MUGS::Persona does MUGS::Identity {
     method authorized-users  { ... }
 
     method default-character { ... }
+
+    method Str(::?CLASS:D:) { $.screen-name }
 }
 
 
