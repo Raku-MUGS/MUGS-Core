@@ -1,6 +1,6 @@
 Revision history for MUGS-Core
 
-0.1.1  *WIP*
+0.1.1  2021-04-15
   [Bug fixes]
   - Stub more required MUGS::App::LocalUI and MUGS::UI::Game methods
   - Don't record nop actions as game events
