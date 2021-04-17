@@ -1,5 +1,10 @@
 Revision history for MUGS-Core
 
+0.1.2  *WIP*
+  [Bug fixes]
+  - Fix a race condition in game client/UI startup
+
+
 0.1.1  2021-04-15
   [Bug fixes]
   - Stub more required MUGS::App::LocalUI and MUGS::UI::Game methods
