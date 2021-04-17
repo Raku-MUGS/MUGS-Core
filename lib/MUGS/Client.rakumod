@@ -279,8 +279,8 @@ class MUGS::Client::Session {
     #| Handle server-push messages
     multi method handle-server-message(MUGS::Message::Push:D $message) {
         with $message.data<game-id> {
-            with   %!games{$_}   { .handle-server-message($message) }
-            orwith %!startup{$_} { .push($message) }
+            with   %!startup{$_} { .push($message) }
+            orwith %!games{$_}   { .handle-server-message($message) }
             else { X::MUGS::Message::InvalidEntity.new(:type<game>, :id($_)).throw }
         }
         else {
@@ -412,8 +412,8 @@ class MUGS::Client::Session {
 
     method flush-startup-messages(::?CLASS:D: MUGS::Client::Game:D $game) {
         my $game-id = $game.game-id;
-        %!games{$game-id}.handle-server-message($_) for @(%!startup{$game-id});
-        %!startup{$game-id}:delete;
+        %!games{$game-id}.handle-server-message($_)
+            for @(%!startup{$game-id}:delete);
     }
 
     multi method leave-game(::?CLASS:D: MUGS::Client::Game:D $game --> Promise:D) {
