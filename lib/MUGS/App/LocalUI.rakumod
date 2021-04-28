@@ -237,7 +237,9 @@ sub play-via-local-ui(MUGS::App::LocalUI:U $app-ui-class,
     $app-ui.start-lobby-client;
 
     # Create (if needed) and then join a game of the requested game-type
-    my $client = $app-ui.new-game-client(:$game-type, :$game-id, :%config);
+    my $client = $game-type eq 'lobby'
+                 ?? $app-ui.lobby-client
+                 !! $app-ui.new-game-client(:$game-type, :$game-id, :%config);
 
     # Create and initialize the game UI
     $app-ui.launch-game-ui(:$game-type, :$client);
