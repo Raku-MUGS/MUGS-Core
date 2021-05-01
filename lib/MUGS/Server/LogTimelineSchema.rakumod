@@ -17,7 +17,7 @@ class UserAuthFailure does Log::Timeline::Event['MUGS', 'Server Core', 'User Aut
 class GameCreated does Log::Timeline::Event['MUGS', 'Server Core', 'Game Created'] { }
 
 
-# class Bar does Log::Timeline::Task['MUGS', 'Server Core', 'Bar'] { }
+class GameStateUpdate does Log::Timeline::Task['MUGS', 'Game Engine', 'State Update'] { }
 
 
 # Make sure the timeline starts at process init, not just whenever the server started
