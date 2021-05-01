@@ -39,7 +39,7 @@ sub validate-structure($type, $data, $schema, $path = 'root') is export {
         }
         default {
             X::MUGS::InvalidStructure.new(:$type, :$path, :$data,
-                                          :error("must be {$schema.^name}")).throw
+                                          :error("must be {$schema.raku}")).throw
                 unless $data ~~ $schema;
         }
     }
