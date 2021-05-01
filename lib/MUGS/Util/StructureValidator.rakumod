@@ -30,7 +30,13 @@ sub validate-structure($type, $data, $schema, $path = 'root') is export {
                 unless nqp::istype(data, Positional);
 
             if schema && schema.elems {
-                validate(data[$_], schema[0], path ~ "/$_") for data.keys;
+                my $s := schema[0];
+                validate(data[$_], $s, path ~ "/$_") for data.keys;
+            }
+            elsif nqp::istype(schema, array) {
+                X::MUGS::InvalidStructure.new(:$type, :path(path), :data(data),
+                                              :error("must be {schema.raku}")).throw
+                    unless nqp::istype(data, schema);
             }
         }
         elsif nqp::istype(schema, Associative) {
