@@ -91,7 +91,8 @@ class X::MUGS::Response::ServerError is X::MUGS::Response {
 
 #| Base class for client <-> server messages
 class MUGS::Message {
-    has $.id = NEXT-ID;
+    has $.id      = NEXT-ID;
+    has $.created = now;
     has %.data;
 
     # Subclasses only need to convert from/to simple structures, and Message
