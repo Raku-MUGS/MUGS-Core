@@ -18,29 +18,34 @@ role Optional is export {
 }
 
 sub validate-structure($type, $data, $schema, $path = 'root') is export {
-    return if $schema ~~ Optional && !$data.defined;
+    use nqp;
 
-    given $schema {
-        when Positional {
-            X::MUGS::InvalidStructure.new(:$type, :$path, :$data,
+    my &validate = -> \data, \schema, \path {
+        if nqp::istype(schema, Optional) && !data.defined {
+            # Optional matches undefined
+        }
+        elsif nqp::istype(schema, Positional) {
+            X::MUGS::InvalidStructure.new(:$type, :path(path), :data(data),
                                           :error('must be Positional')).throw
-                unless $data ~~ Positional;
-            for $data.kv -> $i, $v {
-                validate-structure($type, $v, $schema[0], "$path/$i")
+                unless nqp::istype(data, Positional);
+
+            if schema && schema.elems {
+                validate(data[$_], schema[0], path ~ "/$_") for data.keys;
             }
         }
-        when Associative {
-            X::MUGS::InvalidStructure.new(:$type, :$path, :$data,
+        elsif nqp::istype(schema, Associative) {
+            X::MUGS::InvalidStructure.new(:$type, :path(path), :data(data),
                                           :error('must be Associative')).throw
-                unless $data ~~ Associative;
-            for $schema.kv -> $k, $s {
-                validate-structure($type, $data{$k}, $s, "$path/$k")
-            }
+                unless nqp::istype(data, Associative);
+
+            validate(data{$_}, schema{$_}, path ~ "/$_") for schema.keys;
         }
-        default {
-            X::MUGS::InvalidStructure.new(:$type, :$path, :$data,
-                                          :error("must be {$schema.raku}")).throw
-                unless $data ~~ $schema;
+        else {
+            X::MUGS::InvalidStructure.new(:$type, :path(path), :data(data),
+                                          :error("must be {schema.raku}")).throw
+                unless data ~~ schema;
         }
     }
+
+    validate($data, $schema, $path)
 }
