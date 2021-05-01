@@ -3,6 +3,15 @@ Revision history for MUGS-Core
 0.1.2  *WIP*
   [Bug fixes]
   - Fix a race condition in game client/UI startup
+  - Don't create a second lobby client if directly entering lobby
+  - Slightly improve invalid structure error messages
+
+  [Logging/Telemetry]
+  - Track creation Instant for Message objects
+  - Add GameStateUpdate as first Log::Timeline::Task in Server
+
+  [Performance]
+  - Much faster and perf-stable StructureValidator
 
 
 0.1.1  2021-04-15
