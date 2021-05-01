@@ -3,7 +3,7 @@ use Test;
 use MUGS::Util::StructureValidator;
 
 
-plan 86;
+plan 112;
 
 
 # Check correct exception subclassing
@@ -192,6 +192,55 @@ expect-valid { foo => [ { bar => [ 1, 2, 3 ] }, { bar => [ 5, 6, 7 ] } ] },
 expect-invalid { foo => [ { bar => [ 1, 2, 3 ] }, { bar => [ 5, 6e0, 7 ] } ] },
                { foo => [ { bar => [ Int:D ] } ] },
                "HoAoHoA with one wrong value at lowest level does not match";
+
+
+# Packed arrays
+sub test-self-match(@types, @examples, $generic) {
+    for @types -> $type {
+        subtest "packed {(array[$type]).raku} successful matches", {
+            expect-valid array[$type].new(@examples), array[$type],
+                         "packed {(array[$type]).raku} matches its type object";
+            expect-valid array[$type].new(@examples), [$generic],
+                         "packed {(array[$type]).raku} matches [{$generic.^name}]";
+        }
+    }
+}
+
+sub test-mismatch($type, @examples, $wrong-type, $wrong-generic) {
+    subtest "Mismatched {(array[$type]).raku} isn't valid", {
+        expect-invalid array[$type].new(@examples), array[$wrong-type],
+            "packed {(array[$type]).raku} doesn't match {array[$wrong-type].raku}";
+        expect-invalid array[$type].new(@examples), [$wrong-generic],
+            "packed {(array[$type]).raku} doesn't match [{$wrong-generic.^name}]";
+    }
+}
+
+my @packed-ints  = int, int8, int16, int32, int64;
+my @packed-uints = uint, uint8, byte, uint16, uint32, uint64;
+my @packed-nums  = num, num32, num64;
+
+my @ints  = -128, -10, -4, 0, 12, 127;
+my @uints = 0, 42, 127, 255;
+my @nums  = -1e5, 5.5e-1, 42e0, Inf, -Inf, NaN;
+
+# Test that packed arrays match their type object and an array of their generic
+test-self-match(@packed-ints,  @ints,  Int);
+test-self-match(@packed-uints, @uints, UInt);
+test-self-match(@packed-nums,  @nums,  Num);
+
+# Make sure all combinations of int,uint,num don't match each other at 32 or 64 bits
+test-mismatch(int32,  @ints,  uint32, UInt);
+test-mismatch(int64,  @ints,  uint64, UInt);
+test-mismatch(int32,  @ints,  num32,  Num);
+test-mismatch(int64,  @ints,  num64,  Num);
+test-mismatch(uint32, @uints, int32,  Str);  # These two intentionally have a
+test-mismatch(uint64, @uints, int64,  Str);  # different generic; uint ~~ Int.
+test-mismatch(uint32, @uints, num32,  Num);
+test-mismatch(uint64, @uints, num64,  Num);
+test-mismatch(num32,  @nums,  uint32, UInt);
+test-mismatch(num64,  @nums,  uint64, UInt);
+test-mismatch(num32,  @nums,  int32,  Int);
+test-mismatch(num64,  @nums,  int64,  Int);
 
 
 done-testing;
