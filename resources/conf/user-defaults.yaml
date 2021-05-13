@@ -11,6 +11,9 @@ Servers:
   # The default localhost URL for a websocket server
   local-test:
     url:  'wss://localhost:10000/mugs-ws'
+  # Same default localhost URL, *without* TLS (for debugging)
+  local-test-insecure:
+    url:  'ws://localhost:10000/mugs-ws'
 UI:
   # Common settings for all UIs
   Common:
