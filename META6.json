@@ -8,6 +8,9 @@
   "depends": [
     "CBOR::Simple:ver<0.0.8+>",
     "Cro::CBOR:ver<0.0.2+>",
+    "Cro::Core:ver<0.8.5+>",
+    "Cro::HTTP:ver<0.8.5+>",
+    "Cro::TLS:ver<0.8.5+>",
     "Cro::WebSocket:ver<0.8.5+>",
     "Crypt::SodiumPasswordHash",
     "DBIish",
