@@ -12,6 +12,14 @@ Revision history for MUGS-Core
     as with JSON.  You may be assuming receipt of string data in some places;
     expect to undo any workarounds you may have added.
 
+    ALSO: In order to provide easier-to-read debugging output, some debug code
+    outputs messages in prettified JSON format, which as mentioned above can't
+    represent the full richness of CBOR data.  The following JSON::Fast PR will
+    at least prevent debug output failures; if you're having debug issues,
+    apply the JSON::Fast PR, reinstall it, and try again:
+
+        https://github.com/timo/json_fast/pull/73
+
   [Bug fixes]
   - Fix a race condition in game client/UI startup
   - Don't create a second lobby client if directly entering lobby
