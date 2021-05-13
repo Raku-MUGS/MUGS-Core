@@ -4,6 +4,7 @@ use MUGS::Message;
 use MUGS::Connection;
 
 use Cro::WebSocket::Client;
+use Cro::CBOR;
 use JSON::Fast;
 
 
@@ -15,7 +16,7 @@ class MUGS::Client::Connection::WebSocket does MUGS::Client::Connection {
 
     method connect-to-server(::?CLASS:D: :$server!, :%ca) {
         put "client connecting to '$server' ..." if $!debug;
-        $!cro-client  = Cro::WebSocket::Client.new(:uri($server), :json);
+        $!cro-client  = Cro::CBOR::WebSocket::Client.new(:uri($server), :cbor);
         $!server-conn = await $!cro-client.connect(:%ca);
         put "client successfully connected to '$server'" if $!debug;
     }

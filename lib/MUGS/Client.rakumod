@@ -61,14 +61,12 @@ class MUGS::Client::Game {
 
     method fix-standard-enum-fields(%data) {
         with %data<gamestate> {
-            %data<gamestate> = GameState::{$_} unless $_ ~~ GameState;
-            $!gamestate      = %data<gamestate>;
+            $!gamestate = %data<gamestate> = GameState($_);
         }
 
         if %data<winloss> ~~ Map:D {
             for %data<winloss>.kv -> $identity, $winloss {
-                %data<winloss>{$identity} = WinLoss::{$winloss}
-                    unless $winloss ~~ WinLoss;
+                %data<winloss>{$identity} = WinLoss($winloss);
             }
         }
     }
@@ -345,7 +343,7 @@ class MUGS::Client::Session {
             {
                 game-id          => GameID,
                 game-type        => Str,
-                gamestate        => Str,
+                gamestate        => GameState(Int),
                 config           => Map,
                 num-participants => Int,
                 created-by-me    => Bool,

@@ -904,7 +904,7 @@ class MUGS::Server
         my @characters is Set = $user.available-personas.map(*.characters).flat.map(*.screen-name);
         my @active-games = %!game.kv.map: -> GameID() $game-id, $game {
             my $game-type           = $game.game-type;
-            my $gamestate           = $game.gamestate.Str;
+            my $gamestate           = $game.gamestate;
             my $config              = $game.config;
             my $created-by-me       = $game.creator === $user
                                    || $game.creator.username eq $user.username;

@@ -1,6 +1,17 @@
 Revision history for MUGS-Core
 
 0.1.2  *WIP*
+  [MAJOR CHANGES]
+  - In this release, network serialization has been completely switched over
+    from JSON to CBOR (via CBOR::Simple and Cro::CBOR).  This allows a much
+    richer data model on the wire, more accurate round-tripping, and much
+    faster handling for floating point and packed binary data.
+
+    HOWEVER: This also means that some data will be coming through in native
+    (or in the case of enums, numeric) format, rather than converted to strings
+    as with JSON.  You may be assuming receipt of string data in some places;
+    expect to undo any workarounds you may have added.
+
   [Bug fixes]
   - Fix a race condition in game client/UI startup
   - Don't create a second lobby client if directly entering lobby
