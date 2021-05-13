@@ -11,7 +11,13 @@ Revision history for MUGS-Core
   - Add GameStateUpdate as first Log::Timeline::Task in Server
 
   [Performance]
+  - Depend on Cro 0.8.5+ to get significant WebSocket performance improvements
   - Much faster and perf-stable StructureValidator
+  - Support fast path for validating packed arrays
+
+  [Testing]
+  - Add tests for validation of packed and numeric arrays
+  - Add a 'local-test-insecure' server alias for non-TLS connections
 
 
 0.1.1  2021-04-15
