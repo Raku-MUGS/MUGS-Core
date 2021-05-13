@@ -6,7 +6,9 @@
   "build-depends": [
   ],
   "depends": [
-    "Cro::WebSocket",
+    "CBOR::Simple:ver<0.0.8+>",
+    "Cro::CBOR:ver<0.0.2+>",
+    "Cro::WebSocket:ver<0.8.5+>",
     "Crypt::SodiumPasswordHash",
     "DBIish",
     "JSON::Fast",
