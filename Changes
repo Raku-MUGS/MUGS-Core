@@ -24,10 +24,13 @@ Revision history for MUGS-Core
   - Fix a race condition in game client/UI startup
   - Don't create a second lobby client if directly entering lobby
   - Slightly improve invalid structure error messages
+  - Explicitly depend on Cro component versions to work around Cro packaging
+    issue (https://github.com/croservices/release/issues/2)
 
   [Logging/Telemetry]
   - Track creation Instant for Message objects
   - Add GameStateUpdate as first Log::Timeline::Task in Server
+  - Switch --debug default to False (off) for mugs-ws-server
 
   [Performance]
   - Depend on Cro 0.8.5+ to get significant WebSocket performance improvements
