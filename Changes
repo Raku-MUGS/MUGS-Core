@@ -1,6 +1,6 @@
 Revision history for MUGS-Core
 
-0.1.2  *WIP*
+0.1.2  2021-05-13
   [MAJOR CHANGES]
   - In this release, network serialization has been completely switched over
     from JSON to CBOR (via CBOR::Simple and Cro::CBOR).  This allows a much
