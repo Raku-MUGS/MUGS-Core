@@ -20,7 +20,7 @@ sub MAIN( Str:D :$universe = %*ENV<MUGS_WEBSOCKET_UNIVERSE> || 'default',
          :$certificate-file = %*ENV<MUGS_WEBSOCKET_TLS_CERT> ||
                               %?RESOURCES<fake-tls/server-crt.pem> ||
                                'resources/fake-tls/server-crt.pem',
-         Bool:D :$secure = True, Bool:D :$debug = True) is export {
+         Bool:D :$secure = True, Bool:D :$debug = False) is export {
 
     $PROCESS::DEBUG = $debug;
     put-flushed "Using {$universe ?? "universe '$universe'" !! 'internal stub universe'}.\n";
