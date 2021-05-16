@@ -1,11 +1,7 @@
 # ABSTRACT: Tool for releasing a MUGS repo
 
 
-use Terminal::ANSIColor;
-
-
-# Use subcommand MAIN args
-%PROCESS::SUB-MAIN-OPTS = :named-anywhere;
+use MUGS::App::LocalTool;
 
 
 #| A standard three-part version
@@ -15,43 +11,48 @@ subset Version  of Str where &version;  #= Improves output of USAGE
 subset Codename of Any where Bool|Str;  #= Improves output of USAGE
 
 
-#| Error and exit unless current directory looks like a repo root
-sub ensure-at-repo-root() {
-    unless 'META6.json'.IO.e && '.git'.IO.d {
-        note '!!! Must run this command from a repo root';
-        exit 1;
-    }
-}
+class MUGS::App::Releaser is MUGS::App::LocalTool {
 
+    #| Do basic startup prep
+    method prep(Version:D $version) {
+        %*ENV<NEXT_MUGS_VERSION> = $version;
 
-#| Do basic startup prep
-sub prep($version) {
-    %*ENV<NEXT_MUGS_VERSION> = $version;
-
-    ensure-at-repo-root;
-}
-
-
-#| Quote command in shell-like fashion
-sub quote-command(@cmd) {
-    my @quoted = @cmd.map: {
-        my $escaped = .subst('"', '\\"', :g);
-        $escaped ~~ /^ '-'**^3 '/'? \w+ $/ ?? $escaped !! qq{"$escaped"}
-    };
-}
-
-
-#| Run a command successfully or error out and exit
-sub run-or-exit(@cmd, :$force) {
-    put colored('=== ' ~ quote-command(@cmd).join(' '), 'yellow');
-    return unless $force;
-
-    unless run @cmd {
-        note '!!! Command execution failed, exiting.';
-        exit 1;
+        self.ensure-at-repo-root;
     }
 
-    put '';
+    #| Check whether repo is in good shape to release
+    method check(Version:D $version) {
+        self.prep($version);
+
+        my $today        = ~Date.today;
+        my $escaped-dots = $version.subst('.', "\\.", :g);
+
+        self.run-or-exit($_, :force) for
+            « mi6 test »,
+            « fez checkbuild »,
+            « grep $escaped-dots Changes »,
+            « grep "$escaped-dots\\s\\+$today" Changes »,
+            ;
+
+        self.all-success;
+    }
+
+    #| Perform automated release steps on the current repo
+    method release(Version:D :$version, Codename:D :$codename, Bool :$force = False) {
+        self.prep($version);
+
+        self.run-or-exit($_, :$force) for
+            « git tag -a "v$version" -m "Release $version" »,
+           (« git tag -a "$codename" -m "Codename: $codename" » if $codename ~~ Str:D),
+            « git push »,
+            « git push --tags »,
+            « zef install . »,
+            « fez upload »,
+            ;
+
+        $force ?? self.all-success
+               !! self.error-out('All release commands SKIPPED without --force !!!');
+    }
 }
 
 
@@ -60,19 +61,7 @@ multi MAIN(
     'check',
     Version :$version!,  #= Standard three-part version string (A.B.C)
 ) is export {
-    prep($version);
-    my $today = ~Date.today;
-
-    my $escaped-dots = $version.subst('.', "\\.", :g);
-
-    run-or-exit($_, :force) for
-        « mi6 test »,
-        « fez checkbuild »,
-        « grep $escaped-dots Changes »,
-        « grep "$escaped-dots\\s\\+$today" Changes »,
-        ;
-
-    put colored('--> All check commands executed successfully.', 'bold blue');
+    MUGS::App::Releaser.new.check($version)
 }
 
 
@@ -82,17 +71,5 @@ multi MAIN(
     Codename :$codename!,  #= Code name (or --/codename to not use one)
     Bool     :$force,      #= Actually execute commands (instead of just print them)
 ) is export {
-    prep($version);
-
-    run-or-exit($_, :$force) for
-        « git tag -a "v$version" -m "Release $version" »,
-       (« git tag -a "$codename" -m "Codename: $codename" » if $codename ~~ Str:D),
-        « git push »,
-        « git push --tags »,
-        « zef install . »,
-        « fez upload »,
-        ;
-
-    put $force ?? colored('--> All release commands executed successfully.', 'bold blue')
-               !! colored('!!! All release commands SKIPPED without --force !!!', 'red');
+    MUGS::App::Releaser.new.release(:$version, :$codename, :$force);
 }

@@ -1,80 +1,73 @@
 # ABSTRACT: Tools for simplifying common MUGS developer actions
 
 
-# Use subcommand MAIN args
-%PROCESS::SUB-MAIN-OPTS = :named-anywhere;
+use MUGS::App::LocalTool;
 
 
-my %known;
+class MUGS::App::DevTool is MUGS::App::LocalTool {
+    has %.known;
 
-#| Make a type of thing known, based on finding a module implementing it
-sub make-known($type, $path) {
-    my $thing = $path.basename.subst(/'.' .*/, '');
-    %known{$type}{$thing} = True;
-}
+    #| Make a type of thing known, based on finding a module implementing it
+    method make-known($type, $path) {
+        my $thing = $path.basename.subst(/'.' .*/, '');
+        %!known{$type}{$thing} = True;
+    }
 
-#| Determine all known UIs, games, and genres
-sub find-known() {
-    make-known('ui',    $_) for dir 'lib/MUGS/UI';
-    make-known('game',  $_) for dir 'lib/MUGS/Client/Game';
-    make-known('game',  $_) for dir 'lib/MUGS/Server/Game';
-    make-known('genre', $_) for dir 'lib/MUGS/Client/Genre';
-    make-known('genre', $_) for dir 'lib/MUGS/Server/Genre';
+    #| Determine all known UIs, games, and genres
+    method find-known() {
+        self.make-known('ui',    $_) for dir 'lib/MUGS/UI';
+        self.make-known('game',  $_) for dir 'lib/MUGS/Client/Game';
+        self.make-known('game',  $_) for dir 'lib/MUGS/Server/Game';
+        self.make-known('genre', $_) for dir 'lib/MUGS/Client/Genre';
+        self.make-known('genre', $_) for dir 'lib/MUGS/Server/Genre';
 
-    for %known<ui>.keys -> $ui {
-        if "lib/MUGS/UI/$ui/Game".IO.d {
-            make-known('game', $_)  for dir "lib/MUGS/UI/$ui/Game";
-        }
-        if "lib/MUGS/UI/$ui/Genre".IO.d {
-            make-known('genre', $_) for dir "lib/MUGS/UI/$ui/Genre";
+        for %!known<ui>.keys -> $ui {
+            if "lib/MUGS/UI/$ui/Game".IO.d {
+                self.make-known('game', $_)  for dir "lib/MUGS/UI/$ui/Game";
+            }
+            if "lib/MUGS/UI/$ui/Genre".IO.d {
+                self.make-known('genre', $_) for dir "lib/MUGS/UI/$ui/Genre";
+            }
         }
     }
-}
 
-#| Ensure a condition is true, or exit with an error message
-sub ensure(&condition, Str:D $error) {
-    return if condition();
+    #| Exit with an error if a genre already exists
+    method ensure-new-genre(Str:D $genre) {
+        self.ensure: { not %!known<genre>{$genre} }, "Genre '$genre' already exists.";
+    }
 
-    note $error;
-    exit 1;
-}
+    #| Exit with an error unless a genre already exists
+    method ensure-genre-exists(Str:D $genre) {
+        self.ensure: { %!known<genre>{$genre} }, "Genre '$genre' does not exist.";
+    }
 
-#| Exit with an error unless launched from MUGS repo root
-sub ensure-at-repo-root() {
-    ensure { '.git'.IO.d && 'lib/MUGS'.IO.d },
-           "Must run this command from the MUGS repository root.";
-}
+    #| Exit with an error if a game already exists
+    method ensure-new-game(Str:D $game) {
+        self.ensure: { not %!known<game>{$game} }, "Game '$game' already exists.";
+    }
 
-#| Exit with an error if a genre already exists
-sub ensure-new-genre(Str:D $genre) {
-    ensure { not %known<genre>{$genre} }, "Genre '$genre' already exists.";
-}
+    #| Exit with an error unless all requested UIs exist
+    method ensure-uis-exist(@UIs) {
+        for @UIs -> $ui {
+            self.ensure: { %!known<ui>{$ui} }, "UI '$ui' does not exist.";
+        }
+    }
 
-#| Exit with an error unless a genre already exists
-sub ensure-genre-exists(Str:D $genre) {
-    ensure { %known<genre>{$genre} }, "Genre '$genre' does not exist.";
-}
 
-#| Exit with an error if a game already exists
-sub ensure-new-game(Str:D $game) {
-    ensure { not %known<game>{$game} }, "Game '$game' already exists.";
-}
-
-#| Exit with an error unless all requested UIs exist
-sub ensure-uis-exist(@UIs) {
-    for @UIs -> $ui {
-        ensure { %known<ui>{$ui} }, "UI '$ui' does not exist.";
+    #| Do basic startup prep
+    method prep() {
+        self.ensure-at-repo-root;
+        self.find-known;
     }
 }
 
 
 #| Create a new game genre for one or more UIs
 multi MAIN('new-genre', Str:D $genre, *@UIs where +*, Str:D :$desc!) is export {
-    ensure-at-repo-root;
-    find-known;
-
-    ensure-new-genre($genre);
-    ensure-uis-exist(@UIs);
+    my $tool = MUGS::App::DevTool.new;
+    $tool.prep;
+    $tool.ensure-new-genre($genre);
+    $tool.ensure-uis-exist(@UIs);
 
     mkdir "lib/MUGS/Server/Genre";
     spurt("lib/MUGS/Server/Genre/$genre.rakumod", q:to/SERVER/);
@@ -141,15 +134,14 @@ multi MAIN('new-genre', Str:D $genre, *@UIs where +*, Str:D :$desc!) is export {
 
 #| Create a new game for one or more UIs, optionally based on a known genre
 multi MAIN('new-game', Str:D $game-class, *@UIs where +*, :$genre!, Str:D :$desc!) is export {
-    ensure-at-repo-root;
-    find-known;
+    my $tool = MUGS::App::DevTool.new;
+    $tool.prep;
+    $tool.ensure-new-game($game-class);
+    $tool.ensure-uis-exist(@UIs);
 
-    ensure-new-game($game-class);
-    ensure-uis-exist(@UIs);
-
-    ensure { $genre ~~ Str || $genre === False },
-        "Must specify --genre=GenreName or --/genre";
-    ensure-genre-exists($genre) if $genre;
+    $tool.ensure: { $genre ~~ Str || $genre === False },
+                  'Must specify --genre=GenreName or --/genre';
+    $tool.ensure-genre-exists($genre) if $genre;
 
     my $game-type     = $game-class.subst(/(<:lower>)(<:upper>)/, { "$0-$1" }, :g).lc;
     my $server-base   = $genre ?? "MUGS::Server::Genre::$genre" !! "MUGS::Server::Game";

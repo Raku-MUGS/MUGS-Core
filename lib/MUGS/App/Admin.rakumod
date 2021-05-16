@@ -4,10 +4,7 @@ use MUGS::Util::File;
 use MUGS::Authentication;
 use MUGS::Universe;
 use MUGS::Server::Universe;
-
-
-# Use subcommand MAIN args
-%PROCESS::SUB-MAIN-OPTS = :named-anywhere;
+use MUGS::App::LocalTool;
 
 
 #| Writeable universe config
@@ -21,16 +18,25 @@ class MUGS::Universe::Config::Admin is MUGS::Universe::Config {
 
 
 #| Manage universe trees and the files within them
-class MUGS::Universe::Admin is MUGS::Universe {
+class MUGS::Universe::Admin is MUGS::Universe is MUGS::App::LocalTool {
     #| Default config class
     method default-config-class { MUGS::Universe::Config::Admin }
 
-    #| Die if the universe already exists
+    #| Error and exit if the universe already exists
     method ensure-new() {
-        if $.universe-dir.e {
-            note "Universe '$.universe-name' already exists.";
-            exit 1;
-        }
+        self.ensure: { !$.universe-dir.e },
+                     "Universe '$.universe-name' already exists.";
+    }
+
+    #| Error and exit if the universe does NOT already exist
+    method ensure-exists() {
+        self.ensure: { self.exists },
+            qq:to/MISSING/;
+
+            Universe '$.universe-name' does not yet exist; you can create it using:
+
+                mugs-admin create-universe $.universe-name
+            MISSING
     }
 
     #| Create the universe's base directory
@@ -109,16 +115,7 @@ multi MAIN('update-universe',
            Bool:D :$force         = False,
           ) is export {
     my $universe = MUGS::Universe::Admin.new(:$universe-name);
-    unless $universe.exists {
-        note qq:to/MISSING/;
-
-            Universe '$universe-name' does not yet exist; you can create it using:
-
-                mugs-admin create-universe $universe-name
-            MISSING
-        exit 1;
-    }
-
+    $universe.ensure-exists;
     $universe.load-config;
     $universe.attach-to-database;
 
@@ -145,16 +142,7 @@ multi MAIN('add-test-identities',
            Str:D $universe-name = 'default',
           ) is export {
     my $universe = MUGS::Universe::Admin.new(:$universe-name);
-    unless $universe.exists {
-        note qq:to/MISSING/;
-
-            Universe '$universe-name' does not yet exist; you can create it using:
-
-                mugs-admin create-universe $universe-name
-            MISSING
-        exit 1;
-    }
-
+    $universe.ensure-exists;
     $universe.ensure-valid;
 
     my $server = create-universe-mugs-server($universe);
