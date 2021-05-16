@@ -48,8 +48,9 @@ class MUGS::App::LocalTool {
 
     #| Error and exit unless launched from parent dir of MUGS repo checkouts
     method ensure-at-repo-parent() {
-        self.ensure: { dir('.', test => { "$_/.git".IO.d && "$_/lib/MUGS".IO.d }).elems },
-                     "Must run this command from the {colored('parent', 'bold')} dir of the MUGS repo checkouts.";
+        self.ensure: { dir('.', test => { !.starts-with('.') && "$_/.git".IO.d
+                                          && "$_/lib/MUGS".IO.d }).elems },
+                     "Must run this command from the {BOLD}parent{BOLD_OFF} dir of the MUGS repo checkouts.";
     }
 
     #| Print a command, and if :force is set, run it successfully or error and exit
