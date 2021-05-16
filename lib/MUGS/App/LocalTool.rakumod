@@ -24,6 +24,11 @@ class MUGS::App::LocalTool {
         put colored("\n=== " ~ self.quote-command(@cmd).join(' '), 'yellow');
     }
 
+    #| Highlight that a non-command step is starting
+    method additional-step(Str:D $desc) {
+        put colored("\n=== $desc", 'yellow');
+    }
+
     #| Indicate all done successfully
     method all-success() {
         put colored("\n--> All commands executed successfully.", 'bold blue');
