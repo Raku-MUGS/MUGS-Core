@@ -43,6 +43,8 @@ use MUGS::App::WebSocketServer Empty;
 
 use MUGS::UI;
 use MUGS::App::LocalUI;
+
+use MUGS::App::LocalTool;
 use MUGS::App::DevTool  Empty;
 use MUGS::App::Admin    Empty;
 use MUGS::App::Releaser Empty;

@@ -30,6 +30,7 @@
     "MUGS::App::Admin": "lib/MUGS/App/Admin.rakumod",
     "MUGS::App::CroServer": "lib/MUGS/App/CroServer.rakumod",
     "MUGS::App::DevTool": "lib/MUGS/App/DevTool.rakumod",
+    "MUGS::App::LocalTool": "lib/MUGS/App/LocalTool.rakumod",
     "MUGS::App::LocalUI": "lib/MUGS/App/LocalUI.rakumod",
     "MUGS::App::Releaser": "lib/MUGS/App/Releaser.rakumod",
     "MUGS::App::WebSocketServer": "lib/MUGS/App/WebSocketServer.rakumod",
