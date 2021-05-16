@@ -62,6 +62,27 @@ class MUGS::App::DevTool is MUGS::App::LocalTool {
 }
 
 
+#| Create a new UI type
+multi MAIN('new-ui-type', Str:D $ui-type, Str:D :$desc!) is export {
+    my $tool = MUGS::App::DevTool.new;
+    $tool.ensure-at-repo-parent;
+
+    my $class = 'MUGS::UI::' ~ $ui-type;
+    my $repo  = $class.subst('::', '-', :g);
+    $tool.ensure: { !$repo.IO.e }, "Directory '$repo' already exists.";
+
+    $tool.run-or-exit(« mi6 new $class », :force);
+    chdir $repo;
+    $tool.run-or-exit($_, :force) for
+        « git commit -m "Initial mi6 template" »,
+        « git branch -M main »,
+        « git status »,
+        ;
+
+    $tool.all-success;
+}
+
+
 #| Create a new game genre for one or more UIs
 multi MAIN('new-genre', Str:D $genre, *@UIs where +*, Str:D :$desc!) is export {
     my $tool = MUGS::App::DevTool.new;
