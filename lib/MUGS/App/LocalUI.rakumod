@@ -105,6 +105,18 @@ class MUGS::App::LocalUI {
                  && $session.server     ~~ MUGS::Server
     }
 
+    #| Decode user's server request and connect to it or error out
+    method decode-and-connect(Str $server, Str $universe) {
+        my $decoded = self.decode-server($server);
+
+        # Try to connect, bailing out if unable to do so
+        unless my $session = TRY({ self.connect($decoded<url> // $decoded<server>, $universe) }) {
+            self.exit-with-errors("Unable to connect to MUGS server '$decoded<server>':", [$!]);
+        }
+
+        $decoded
+    }
+
     #| Decode a user's specified server to determine its URL, username, and password
     method decode-server(Str $server) {
         my $srv = $server || $.config.value('Servers', 'DEFAULT') || 'internal';
@@ -167,6 +179,15 @@ class MUGS::App::LocalUI {
     method disconnect() {
         $!session.disconnect if $!session;
         $!session = Nil;
+    }
+
+    #| Determine an initial username and password, given decoded server info
+    method initial-userpass(%decoded) {
+        my $username  = %decoded<username>
+                     || $.config.value('Servers', %decoded<server>, 'user');
+        my $password  = $.config.value('Servers', %decoded<server>, 'pass') // '';
+
+        ($username, $password)
     }
 
     #| Choose identities (persona and character) to use when creating or joining games
