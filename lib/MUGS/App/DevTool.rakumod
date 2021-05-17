@@ -63,7 +63,7 @@ class MUGS::App::DevTool is MUGS::App::LocalTool {
 
 
 #| Create a new UI type
-multi MAIN('new-ui-type', Str:D $ui-type, Str:D :$desc!) is export {
+multi MAIN('new-ui-type', Str:D $ui-type) is export {
     my $tool = MUGS::App::DevTool.new;
     $tool.ensure-at-repo-parent;
 
