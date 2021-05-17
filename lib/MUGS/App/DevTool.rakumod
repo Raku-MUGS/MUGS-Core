@@ -103,7 +103,7 @@ multi MAIN('new-ui-type', Str:D $ui-type) is export {
     spurt($app-file, q:to/APP_MODULE/);
         # ABSTRACT: Core logic to set up and run a \qq[$ui-type] game
 
-        # XXXX: use \qq[$ui-type] app module here
+        # XXXX: use \qq[$ui-type] essential app modules here
 
         use MUGS::Core;
         use MUGS::App::LocalUI;
@@ -116,8 +116,21 @@ multi MAIN('new-ui-type', Str:D $ui-type) is export {
 
         #| \qq[$ui-type] App
         class \qq[$app] is MUGS::App::LocalUI {
+            # XXXX: Add attributes for app-wide state here
 
             method ui-type() { '\qq[$ui-type]' }
+
+            #| Initialize the overall MUGS client app
+            method initialize() {
+                callsame;
+                # XXXX: Extend to initialize toolkit and \qq[$ui-type]-specific globals
+            }
+
+            #| Shut down the overall MUGS client app (as cleanly as possible)
+            method shutdown() {
+                # XXXX: Extend to stop \qq[$ui-type]
+                callsame;
+            }
 
             #| Connect to server and authenticate as a valid user
             method ensure-authenticated-session(Str $server, Str $universe) {
@@ -168,7 +181,7 @@ multi MAIN('new-ui-type', Str:D $ui-type) is export {
         use MUGS::Games:ver<\qq[$MUGS-version]>;
 
 
-        ### TUI INTERFACE
+        ### \qq[$ui-type.uc()] INTERFACE
 
         use \qq[$class];
         use MUGS::App::\qq[$ui-type] Empty;
