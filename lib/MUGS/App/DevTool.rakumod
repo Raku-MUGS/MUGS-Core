@@ -119,6 +119,15 @@ multi MAIN('new-ui-type', Str:D $ui-type, Str:D :$desc!) is export {
 
             method ui-type() { '\qq[$ui-type]' }
 
+            #| Connect to server and authenticate as a valid user
+            method ensure-authenticated-session(Str $server, Str $universe) {
+                my $decoded = self.decode-and-connect($server, $universe);
+                my ($username, $password) = self.initial-userpass($decoded);
+
+                # XXXX: Should allow player to correct errors and retry or exit
+                await $.session.authenticate(:$username, :$password);
+            }
+
             #| Start actively playing current game UI
             method play-current-game() {
                 # XXXX: Enter \qq[$ui-type] main loop here
