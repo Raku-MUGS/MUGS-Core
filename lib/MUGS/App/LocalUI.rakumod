@@ -76,7 +76,7 @@ class MUGS::App::LocalUI {
 
     #| Disconnect if needed, then exit with error messages for the player
     method exit-with-errors(Str:D $intro, @errors) {
-        self.disconnect;
+        self.shutdown;
 
         note $intro;
         .message.indent(4).put for @errors;
