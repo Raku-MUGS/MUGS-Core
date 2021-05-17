@@ -242,6 +242,12 @@ sub play-via-local-ui(MUGS::App::LocalUI:U $app-ui-class,
     #   * User config (and config defaults) loaded successfully
     #   * User's locale has been activated
 
+    $app-ui.exit-with-errors("Cannot launch '$game-type'; missing client plugin.", [])
+        unless MUGS::Client.implementation-exists($game-type);
+
+    $app-ui.exit-with-errors("Cannot launch '$game-type'; missing UI plugin.", [])
+        unless MUGS::UI.ui-exists($app-ui.ui-type, $game-type);
+
     # Connect to server and authenticate as a valid user;
     # should allow player to correct errors and retry or exit
     $app-ui.ensure-authenticated-session($server, $universe);
