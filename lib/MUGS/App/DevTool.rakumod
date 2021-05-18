@@ -206,12 +206,11 @@ multi MAIN('new-ui-type', Str:D $ui-type) is export {
 }
 
 
-#| Create a new game genre for one or more UIs
-multi MAIN('new-genre', Str:D $genre, *@UIs where +*, Str:D :$desc!) is export {
+#| Create a new game genre core (Server/Client pair)
+multi MAIN('new-genre-core', Str:D $genre, Str:D :$desc!) is export {
     my $tool = MUGS::App::DevTool.new;
     $tool.prep;
     $tool.ensure-new-genre($genre);
-    $tool.ensure-uis-exist(@UIs);
 
     mkdir "lib/MUGS/Server/Genre";
     spurt("lib/MUGS/Server/Genre/$genre.rakumod", q:to/SERVER/);
@@ -257,31 +256,41 @@ multi MAIN('new-genre', Str:D $genre, *@UIs where +*, Str:D :$desc!) is export {
         }
         CLIENT
 
-    for @UIs -> $ui {
-        my $ui-desc = $ui.ends-with('I') ?? $ui !! $ui ~ ' interface';
-        mkdir "lib/MUGS/UI/$ui/Genre";
-        spurt("lib/MUGS/UI/$ui/Genre/$genre.rakumod", q:to/UI/);
-            # ABSTRACT: General \qq[$ui-desc] for \qq[$desc] games
-
-            use MUGS::Core;
-            use MUGS::Client::Genre::\qq[$genre];
-            use MUGS::UI::\qq[$ui];
-
-
-            #| \qq[$ui-desc] for \qq[$desc] games
-            class MUGS::UI::\qq[$ui]::Genre::\qq[$genre] is MUGS::UI::\qq[$ui]::Game {
-            }
-            UI
-    }
+    $tool.all-success;
 }
 
 
-#| Create a new game for one or more UIs, optionally based on a known genre
-multi MAIN('new-game', Str:D $game-class, *@UIs where +*, :$genre!, Str:D :$desc!) is export {
+#| Create a new game genre UI base
+multi MAIN('new-genre-ui', Str:D $genre, Str:D $ui, Str:D :$desc!) is export {
+    my $tool = MUGS::App::DevTool.new;
+    $tool.prep;
+    $tool.ensure-new-genre($genre);
+    $tool.ensure-uis-exist([$ui]);
+
+    my $ui-desc = $ui.ends-with('I') ?? $ui !! $ui ~ ' interface';
+    mkdir "lib/MUGS/UI/$ui/Genre";
+    spurt("lib/MUGS/UI/$ui/Genre/$genre.rakumod", q:to/UI/);
+        # ABSTRACT: General \qq[$ui-desc] for \qq[$desc] games
+
+        use MUGS::Core;
+        use MUGS::Client::Genre::\qq[$genre];
+        use MUGS::UI::\qq[$ui];
+
+
+        #| \qq[$ui-desc] for \qq[$desc] games
+        class MUGS::UI::\qq[$ui]::Genre::\qq[$genre] is MUGS::UI::\qq[$ui]::Game {
+        }
+        UI
+
+    $tool.all-success;
+}
+
+
+#| Create a new game core (Server/Client pair), optionally based on a known genre
+multi MAIN('new-game-core', Str:D $game-class, :$genre!, Str:D :$desc!) is export {
     my $tool = MUGS::App::DevTool.new;
     $tool.prep;
     $tool.ensure-new-game($game-class);
-    $tool.ensure-uis-exist(@UIs);
 
     $tool.ensure: { $genre ~~ Str || $genre === False },
                   'Must specify --genre=GenreName or --/genre';
@@ -351,28 +360,44 @@ multi MAIN('new-game', Str:D $game-class, *@UIs where +*, :$genre!, Str:D :$desc
         MUGS::Client::Game::\qq[$game-class].register;
         CLIENT
 
-    for @UIs -> $ui {
-        my $ui-desc   = $ui.ends-with('I') ?? $ui !! $ui ~ ' interface';
-        my $ui-base   = $genre ?? "MUGS::UI::{$ui}::Genre::$genre" !! "MUGS::UI::{$ui}::Game";
-        my $ui-module = $genre ?? "MUGS::UI::{$ui}::Genre::$genre" !! "MUGS::UI::{$ui}";
-
-        mkdir "lib/MUGS/UI/$ui/Game";
-        spurt("lib/MUGS/UI/$ui/Game/$game-class.rakumod", q:to/UI/);
-            # ABSTRACT: \qq[$ui-desc] for \qq[$desc] games
-
-            use MUGS::Core;
-            use MUGS::Client::Game::\qq[$game-class];
-            use \qq[$ui-module];
+    $tool.all-success;
+}
 
 
-            #| \qq[$ui-desc] for a \qq[$desc] game
-            class MUGS::UI::\qq[$ui]::Game::\qq[$game-class] is \qq[$ui-base] {
-                method game-type() { '\qq[$game-type]' }
-            }
+#| Create a new game UI plugin, optionally based on a known genre
+multi MAIN('new-game-ui', Str:D $game-class, Str:D $ui, :$genre!, Str:D :$desc!) is export {
+    my $tool = MUGS::App::DevTool.new;
+    $tool.prep;
+    $tool.ensure-new-game($game-class);
+    $tool.ensure-uis-exist([$ui]);
+
+    $tool.ensure: { $genre ~~ Str || $genre === False },
+                  'Must specify --genre=GenreName or --/genre';
+    $tool.ensure-genre-exists($genre) if $genre;
+
+    my $game-type = $game-class.subst(/(<:lower>)(<:upper>)/, { "$0-$1" }, :g).lc;
+    my $ui-desc   = $ui.ends-with('I') ?? $ui !! $ui ~ ' interface';
+    my $ui-base   = $genre ?? "MUGS::UI::{$ui}::Genre::$genre" !! "MUGS::UI::{$ui}::Game";
+    my $ui-module = $genre ?? "MUGS::UI::{$ui}::Genre::$genre" !! "MUGS::UI::{$ui}";
+
+    mkdir "lib/MUGS/UI/$ui/Game";
+    spurt("lib/MUGS/UI/$ui/Game/$game-class.rakumod", q:to/UI/);
+        # ABSTRACT: \qq[$ui-desc] for \qq[$desc] games
+
+        use MUGS::Core;
+        use MUGS::Client::Game::\qq[$game-class];
+        use \qq[$ui-module];
 
 
-            # Register this class as a valid game UI
-            MUGS::UI::\qq[$ui]::Game::\qq[$game-class].register;
-            UI
-    }
+        #| \qq[$ui-desc] for a \qq[$desc] game
+        class MUGS::UI::\qq[$ui]::Game::\qq[$game-class] is \qq[$ui-base] {
+            method game-type() { '\qq[$game-type]' }
+        }
+
+
+        # Register this class as a valid game UI
+        MUGS::UI::\qq[$ui]::Game::\qq[$game-class].register;
+        UI
+
+    $tool.all-success;
 }
