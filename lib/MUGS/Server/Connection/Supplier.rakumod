@@ -21,7 +21,7 @@ class MUGS::Server::Connection::Supplier does MUGS::Server::Connection {
 
     method send-to-client(MUGS::Message:D $message) {
         put "server --> CLIENT:\n{$message.to-json}\n" if $!debug;
-        $!client-conn.send-to-client($message);
+        $!client-conn.send-to-client($message) if $!client-conn;
     }
 
     method send-to-server(MUGS::Message:D $message) {
