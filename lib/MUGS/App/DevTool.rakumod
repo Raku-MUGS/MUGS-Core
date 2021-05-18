@@ -13,21 +13,22 @@ class MUGS::App::DevTool is MUGS::App::LocalTool {
         %!known{$type}{$thing} = True;
     }
 
+    #| Read directory contents, or return Empty if the directory does not exist
+    method safe-dir($dir) {
+        $dir.IO.d ?? dir($dir) !! Empty
+    }
+
     #| Determine all known UIs, games, and genres
     method find-known() {
-        self.make-known('ui',    $_) for dir 'lib/MUGS/UI';
-        self.make-known('game',  $_) for dir 'lib/MUGS/Client/Game';
-        self.make-known('game',  $_) for dir 'lib/MUGS/Server/Game';
-        self.make-known('genre', $_) for dir 'lib/MUGS/Client/Genre';
-        self.make-known('genre', $_) for dir 'lib/MUGS/Server/Genre';
+        self.make-known('ui',    $_) for self.safe-dir: 'lib/MUGS/UI';
+        self.make-known('game',  $_) for self.safe-dir: 'lib/MUGS/Client/Game';
+        self.make-known('game',  $_) for self.safe-dir: 'lib/MUGS/Server/Game';
+        self.make-known('genre', $_) for self.safe-dir: 'lib/MUGS/Client/Genre';
+        self.make-known('genre', $_) for self.safe-dir: 'lib/MUGS/Server/Genre';
 
         for %!known<ui>.keys -> $ui {
-            if "lib/MUGS/UI/$ui/Game".IO.d {
-                self.make-known('game', $_)  for dir "lib/MUGS/UI/$ui/Game";
-            }
-            if "lib/MUGS/UI/$ui/Genre".IO.d {
-                self.make-known('genre', $_) for dir "lib/MUGS/UI/$ui/Genre";
-            }
+            self.make-known('game', $_)  for self.safe-dir: "lib/MUGS/UI/$ui/Game";
+            self.make-known('genre', $_) for self.safe-dir: "lib/MUGS/UI/$ui/Genre";
         }
     }
 
