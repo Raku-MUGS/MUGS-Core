@@ -196,7 +196,8 @@ multi MAIN('new-ui-type', Str:D $ui-type) is export {
 
     $tool.run-or-exit($_, :force) for
         « chmod +x $bin-file »,
-        « git add $bin-file $app-file $test-file »,
+        « mi6 build »,
+        « git add $bin-file $app-file $test-file META6.json »,
         « git rm t/01-basic.rakutest »,  # Redundant with 00-use
         « git commit -m "Add MUGS-specific files" »,
         « git status »,
