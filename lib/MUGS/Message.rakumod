@@ -1,6 +1,8 @@
 # ABSTRACT: Messages, serialization, message status, message-related exceptions
 
+use CBOR::Simple;
 use JSON::Fast;
+
 use MUGS::Core;
 use MUGS::Util::StructureValidator;
 
@@ -96,9 +98,15 @@ class MUGS::Message {
     has %.data;
 
     # Subclasses only need to convert from/to simple structures, and Message
-    # automatically handles serialization from/to JSON or other wire formats
-    method to-json(::?CLASS:D: --> Str)     { to-json self.to-struct }
-    method from-json(::?CLASS:U: Str $json) { self.from-struct: from-json $json }
+    # automatically handles serialization from/to JSON, CBOR, or other wire formats
+    method to-json(::?CLASS:D: --> Str)      { to-json self.to-struct, :!pretty }
+    method from-json(::?CLASS:U: Str $json)  { self.from-struct: from-json $json }
+
+    method to-cbor(::?CLASS:D: --> Blob)     { cbor-encode self.to-struct }
+    method from-cbor(::?CLASS:U: Blob $cbor) { self.from-struct: cbor-decode $cbor }
+
+    method to-debug(::?CLASS:D: --> Str)     { to-json self.to-struct, :sorted-keys }
+
 
     #| Validate %!data against a schema and return validated Map
     method validated-data(::?CLASS:D: %schema) {
