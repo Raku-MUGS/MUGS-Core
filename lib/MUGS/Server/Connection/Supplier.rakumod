@@ -1,5 +1,7 @@
 # ABSTRACT: Server side of in-memory Supplier-based Connection
 
+use CBOR::Simple;
+
 use MUGS::Message;
 use MUGS::Connection;
 
@@ -20,13 +22,17 @@ class MUGS::Server::Connection::Supplier does MUGS::Server::Connection {
     }
 
     method send-to-client(MUGS::Message:D $message) {
-        put "server --> CLIENT:\n{$message.to-json}\n" if $!debug;
-        $!client-conn.send-to-client($message) if $!client-conn;
+        put "server --> CLIENT:\n{$message.to-debug}\n" if $!debug;
+        $!client-conn.send-to-client($message.to-cbor) if $!client-conn;
     }
 
-    method send-to-server(MUGS::Message:D $message) {
-        put "server --> SERVER:\n{$message.to-struct.raku.indent(4)}\n" if $!debug;
-        $!to-server.emit($message);
+    method send-to-server(Blob:D $cbor) {
+        my $struct = cbor-decode $cbor;
+        put "server --> SERVER:\n{$struct.raku.indent(4)}\n" if $!debug;
+
+        $!to-server.emit: $struct<game-id>
+                          ?? MUGS::Message::Request::InGame.from-struct($struct)
+                          !! MUGS::Message::Request.from-struct($struct);
     }
 
     method from-client-supply() { $!from-client }
