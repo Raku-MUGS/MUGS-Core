@@ -85,11 +85,12 @@ multi MAIN('new-ui-type', Str:D $ui-type) is export {
     .put, .IO.mkdir for « docs lib/MUGS/App $lib-dir
                           "$lib-dir/Game" "$lib-dir/Genre" »;
 
-    $tool.additional-step('Adding MUGS-specific files');
+    $tool.additional-step('Adding/updating MUGS-specific files');
 
     my $MUGS-version = $?DISTRIBUTION.meta<version>;
     my $bin-file     = 'bin/mugs-' ~ $ui-type.lc.subst(/^ 'web' /, 'web-');
     my $app-file     = "lib/MUGS/App/{$ui-type}.rakumod";
+    my $class-file   = "lib/MUGS/UI/{$ui-type}.rakumod";
     my $test-file    = "t/00-use.rakutest";
 
     put $bin-file;
@@ -115,9 +116,10 @@ multi MAIN('new-ui-type', Str:D $ui-type) is export {
         %PROCESS::SUB-MAIN-OPTS = :named-anywhere;
 
 
-        #| \qq[$ui-type] App
+        #| \qq[$ui-type] app
         class \qq[$app] is MUGS::App::LocalUI {
-            # XXXX: Add attributes for app-wide state here
+            has MUGS::UI::Pop::Game $.current-game;
+            # XXXX: Add additional app-wide state attributes here
 
             method ui-type() { '\qq[$ui-type]' }
 
@@ -142,9 +144,15 @@ multi MAIN('new-ui-type', Str:D $ui-type) is export {
                 await $.session.authenticate(:$username, :$password);
             }
 
+            #| Create and initialize a new game UI for a given game type and client
+            method launch-game-ui(Str:D :$game-type, MUGS::Client::Game:D :$client, *%ui-opts) {
+                $!current-game = callsame;
+            }
+
             #| Start actively playing current game UI
             method play-current-game() {
-                # XXXX: Enter \qq[$ui-type] main loop here
+                # XXXX: Enter \qq[$ui-type] main loop here, or (by default) hand to game UI
+                $!current-game.main-loop;
             }
         }
 
@@ -172,6 +180,23 @@ multi MAIN('new-ui-type', Str:D $ui-type) is export {
         }
         APP_MODULE
 
+    put $class-file;
+    my $skip-first-line = $class-file.IO.lines(:!chomp)[1..*].join;
+    spurt($class-file, q:to/BASE_CLASS/ ~ $skip-first-line);
+        # ABSTRACT: \qq[$ui-type] UI for MUGS, including App and game UIs
+
+        unit module \qq[$class]:ver<0.0.1>;
+
+        use MUGS::UI;
+
+
+        # Base class for \qq[$ui-type] game UIs
+        class Game is MUGS::UI::Game {
+            method ui-type() { '\qq[$ui-type]' }
+        }
+
+        BASE_CLASS
+
     put $test-file;
     spurt($test-file, q:to/USE_TEST/);
         use v6.d;
@@ -197,9 +222,9 @@ multi MAIN('new-ui-type', Str:D $ui-type) is export {
     $tool.run-or-exit($_, :force) for
         « chmod +x $bin-file »,
         « mi6 build »,
-        « git add $bin-file $app-file $test-file META6.json »,
+        « git add $bin-file $app-file $class-file $test-file META6.json »,
         « git rm t/01-basic.rakutest »,  # Redundant with 00-use
-        « git commit -m "Add MUGS-specific files" »,
+        « git commit -m "Add MUGS-specific files and tweaks" »,
         « git status »,
     ;
 
