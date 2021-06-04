@@ -1,5 +1,28 @@
 Revision history for MUGS-Core
 
+0.1.3  *WIP*
+  [Contacting us]
+  - Move official IRC support channel from Freenode to Libera.Chat
+
+  [Core features]
+  - Support to/from-cbor and to-debug methods for all Message classes
+  - Serialize to CBOR even for Supplier connections
+
+  [Error handling]
+  - Shutdown, not just disconnect, in LocalUI.exit-with-errors
+  - Exit with errors if missing requested game plugins
+  - Don't crash if Supplier is disconnected before final response
+
+  [Refactoring]
+  - Factor common code out of CLI tools into LocalTool
+  - Factor out decode-and-connect and initial-userpass into LocalUI
+  - Factor out check directory exists before reading it in DevTool
+
+  [Tools]
+  - Add a new-ui-type command to mugs-tool
+  - Reorient mugs-tool game/genre subcommands for multi-repo world
+
+
 0.1.2  2021-05-13
   [MAJOR CHANGES]
   - In this release, network serialization has been completely switched over
