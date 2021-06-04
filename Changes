@@ -13,6 +13,9 @@ Revision history for MUGS-Core
   - Exit with errors if missing requested game plugins
   - Don't crash if Supplier is disconnected before final response
 
+  [Packaging]
+  - Update Dockerfile dependency versions
+
   [Refactoring]
   - Factor common code out of CLI tools into LocalTool
   - Factor out decode-and-connect and initial-userpass into LocalUI
