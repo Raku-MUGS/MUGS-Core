@@ -15,6 +15,7 @@ Revision history for MUGS-Core
 
   [Packaging]
   - Update Dockerfile dependency versions
+  - Update CBOR::Simple and Cro::CBOR dependency versions
 
   [Refactoring]
   - Factor common code out of CLI tools into LocalTool

@@ -13,7 +13,7 @@ RUN chmod 700 /home/raku \
 # Partially adapted from cro-http-websocket Dockerfile, maintained by
 # Jonathan Worthington <jonathan@edument.se>
 ARG cro_version=0.8.5
-ARG cro_cbor_version=0.0.2
+ARG cro_cbor_version=0.0.3
 
 RUN apt-get update \
  && apt-get -y --no-install-recommends install build-essential libsodium-dev libssl-dev \
