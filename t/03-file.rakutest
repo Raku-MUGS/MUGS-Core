@@ -219,7 +219,7 @@ else {
 }
 
 
-sub write-variants-create($type, $file, $expected, **@documents) {
+sub write-variants-create($type, $file, Mu $expected, **@documents) {
     my $desc = "write-yaml-file created a file from {+@documents} doc{'s' unless @documents == 1} for $type test";
 
     write-yaml-file($type, "$base-dir/$file", |@documents);
@@ -248,5 +248,9 @@ sub write-variants-create($type, $file, $expected, **@documents) {
 
 write-variants-create('empty',      'file0.yaml', "...");
 write-variants-create('single doc', 'file1.yaml', "---\n- 42\n...", [42]);
-write-variants-create('duo-doc',    'file2.yaml', "---\n- 42\n---\nfoo: bar\n...", [42], { foo => 'bar' });
+# Junction for expected result in next line brought to you by YAMLish quoting changes
+write-variants-create('duo-doc',    'file2.yaml',
+                        "---\n- 42\n---\nfoo: bar\n..."
+                      | "---\n- 42\n---\n\"foo\": \"bar\"\n...",
+                        [42], { foo => 'bar' });
 write-variants-create('overwrite',  'file2.yaml', "---\n- 7\n...", [7]);
