@@ -183,7 +183,13 @@ class MUGS::Server::Game {
 
     # Most game implementations will NOT override these
     method register() {
+        self.ensure-safe-to-register;
+
         MUGS::Server.register-implementation(self.game-type, self.WHAT);
+    }
+
+    method ensure-safe-to-register() {
+        self.ensure-valid-config-form;
     }
 
     submethod BUILD(:$!server!, :$!creator!, :%config!) {
@@ -204,6 +210,22 @@ class MUGS::Server::Game {
         die "Proposed new default ({$default.raku}) for config field '$field' does not match config field type '{$field-def<type>.^name}'"
             unless $default ~~ $field-def<type>;
         $field-def<default> = $default;
+    }
+
+    method ensure-valid-config-form() {
+        constant $schema = [
+            {
+                field    => Str:D,
+                section  => Str:D,
+                desc     => Str:D,
+                type     => Any:U,
+                default  => Any:D,
+                # XXXX: Backwords compatibility with MUGS-Core 0.1.2 API
+                validate => (Callable | [ Pair:D ]) but Optional,
+                visible-locally => Bool but Optional,
+            },
+        ];
+        validate-structure('config form', self.config-form, $schema);
     }
 
     method ensure-valid-config(%config) {
