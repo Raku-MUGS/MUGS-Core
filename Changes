@@ -7,6 +7,9 @@ Revision history for MUGS-Core
   [Core features]
   - Support to/from-cbor and to-debug methods for all Message classes
   - Serialize to CBOR even for Supplier connections
+  - Support Junction as StructureValidator schema node
+  - Ensure config form valid before registering Server Game class
+  - Allow for better errors from config form field validators
 
   [Error handling]
   - Shutdown, not just disconnect, in LocalUI.exit-with-errors
@@ -25,6 +28,9 @@ Revision history for MUGS-Core
   [Tools]
   - Add a new-ui-type command to mugs-tool
   - Reorient mugs-tool game/genre subcommands for multi-repo world
+
+  [Testing]
+  - Work around YAMLish quoting change affecting File tests
 
 
 0.1.2  2021-05-13
