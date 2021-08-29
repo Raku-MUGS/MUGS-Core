@@ -148,14 +148,16 @@ class MUGS::Server::Game {
               desc     => 'Minimum players to start game',
               type     => UInt,
               default  => 1,
-              validate => { .<start-players> >= .<min-players> },
+              validate => [ 'start-players >= min-players'
+                            => { .<start-players> >= .<min-players> } ]
             },
             { field    => 'max-players',
               section  => 'Players',
               desc     => 'Maximum players simultaneously in game',
               type     => UInt,
               default  => 1,
-              validate => { .<max-players> >= max(.<min-players>, .<start-players>) },
+              validate => [ 'max-players >= min-players and max-players >= start-players'
+                            => { .<max-players> >= max(.<min-players>, .<start-players>) } ]
             },
             { field    => 'invites-only',
               section  => 'Players',
@@ -217,8 +219,16 @@ class MUGS::Server::Game {
                 my $type = %field-def<type>;
                 invalid-config("value for config field '$k' must have type { $type.^name }")
                     unless $v ~~ $type;
-                invalid-config("value for config field '$k' does not pass validation")
-                    if %field-def<validate> && !%field-def<validate>(%config);
+                if %field-def<validate> -> @validations {
+                    for @validations -> $ (:key($reason), :value(&check)) {
+                        invalid-config("value for config field '$k' does not pass validation '$reason'") unless check(%config);
+                    }
+                }
+                # XXXX: Backwords compatibility with MUGS-Core 0.1.2 API
+                elsif %field-def<validate> -> &check {
+                    invalid-config("value for config field '$k' does not pass validation")
+                        unless check(%config);
+                }
             }
             else {
                 invalid-config('unknown config field')
