@@ -46,6 +46,44 @@ sub validate-structure($type, $data, $schema, $path = 'root') is export {
 
             validate(data{$_}, schema{$_}, path ~ "/$_") for schema.keys;
         }
+        elsif nqp::istype(schema, Junction) {
+            my str $jtype = nqp::getattr(nqp::decont(schema), Junction, '$!type');
+            my $jstates  := nqp::getattr(nqp::decont(schema), Junction, '$!eigenstates');
+
+            my $path = path ~ "/$jtype\(…)";
+            if $jtype eq 'any' {
+                for $jstates -> $state {
+                    try validate(data, $state, $path);
+                    last unless $!;
+                }
+                X::MUGS::InvalidStructure.new(:$type, :$path, :data(data),
+                                              :error('no matching any junction variant')).throw if $!;
+            }
+            elsif $jtype eq 'all' {
+                validate(data, $_, $path) for $jstates;
+            }
+            elsif $jtype eq 'none' {
+                for $jstates -> $state {
+                    try validate(data, $state, $path);
+                    X::MUGS::InvalidStructure.new(:$type, :$path, :data(data),
+                                                  :error('matched a none junction variant')).throw unless $!;
+                }
+            }
+            elsif $jtype eq 'one' {
+                my int $count = 0;
+                for $jstates -> $state {
+                    try validate(data, $state, $path);
+                    X::MUGS::InvalidStructure.new(:$type, :$path, :data(data),
+                                                  :error('matched too many one junction variants')).throw if !$! && $count++;
+                }
+                X::MUGS::InvalidStructure.new(:$type, :$path, :data(data),
+                                              :error('no matching one junction variant')).throw;
+            }
+            else {
+                X::MUGS::InvalidStructure.new(:$type, :$path, :data(data),
+                                              :error("schema uses unknown Junction type '$jtype'")).throw;
+            }
+        }
         else {
             X::MUGS::InvalidStructure.new(:$type, :path(path), :data(data),
                                           :error("must be {schema.raku}")).throw
