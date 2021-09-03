@@ -325,7 +325,7 @@ class MUGS::Server::Game {
                         orelse X::MUGS::Message::MissingData.new(:field<target>).throw;
                     X::MUGS::Message::InvalidEntity.new(:type<game-id>, :id($.id)).throw
                         unless $target-id == $.id;
-                    self.broadcast-to-game(:sender($character), :$message);
+                    self.broadcast-message-to-game(:sender($character), :$message);
                     $session.success({ :target($.id) }, $request.id);
                 }
                 elsif $message-type eq 'direct-message' && $target-type eq 'character' {
@@ -441,12 +441,12 @@ class MUGS::Server::Game {
         hash(:$.gamestate, :%.winloss, |$action-result);
     }
 
-    method broadcast-to-game(::?CLASS:D: MUGS::Character:D :$sender!,
-                             Str:D :$message!) {
+    method broadcast-message-to-game(::?CLASS:D: MUGS::Character:D :$sender!,
+                                     Str:D :$message!) {
         my $game-id = $.id;
-        for self.participants -> (:$character, :$session, :$instance) {
-            $session.push-message(:$game-id, :$character, :$message,
-                                  :$sender, :message-type<broadcast>);
+        for self.participants -> $p {
+            $p<session>.push-message(:$game-id, :character($p<character>),
+                                     :$message, :$sender, :message-type<broadcast>);
         }
     }
 
