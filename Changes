@@ -10,6 +10,8 @@ Revision history for MUGS-Core
   - Support Junction as StructureValidator schema node
   - Ensure config form valid before registering Server Game class
   - Allow for better errors from config form field validators
+  - Support pre-packed Message data, for sending identical game updates to
+    many clients
 
   [Error handling]
   - Shutdown, not just disconnect, in LocalUI.exit-with-errors
@@ -24,6 +26,7 @@ Revision history for MUGS-Core
   - Factor common code out of CLI tools into LocalTool
   - Factor out decode-and-connect and initial-userpass into LocalUI
   - Factor out check directory exists before reading it in DevTool
+  - Rename Server's broadcast-to-game to broadcast-message-to-game
 
   [Tools]
   - Add a new-ui-type command to mugs-tool
