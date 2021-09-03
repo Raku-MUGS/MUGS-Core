@@ -206,3 +206,45 @@ class MUGS::Message::Push is MUGS::Message {
         try self.new: |%settable
     }
 }
+
+
+#| A packed data map that caches its serialized and unserialized forms
+class MUGS::Message::DataPack {
+    has Blob $.serialized;
+    has      %.struct;
+
+    multi method new(Blob:D $serialized) {
+        self.bless(:$serialized, :struct(cbor-decode $serialized))
+    }
+
+    multi method new(%struct) {
+        self.bless(:serialized(cbor-encode %struct), :%struct)
+    }
+}
+
+
+#| A push message using pre-packed data, not expecting a response
+class MUGS::Message::PushPack is MUGS::Message::Push {
+    has MUGS::Message::DataPack:D $.pack is required;
+
+    # Pull data out of data pack if requested
+    method data(::?CLASS:D:) {
+        $.pack.struct
+    }
+
+    # Convert PushPack objects to/from serializable structures
+    method to-struct(::?CLASS:D: --> Hash) {
+        { :$.id, :$.type, :pack($.pack.serialized) }
+    }
+
+    method from-struct(::?CLASS:U: $struct) {
+        return unless $struct       ~~ Map:D
+                   && $struct<id>   ~~ Int:D
+                   && $struct<type> ~~ Str:D
+                   && $struct<pack> ~~ Blob:D;
+
+        my %settable    := hash($struct< id type >:kv);
+        %settable<pack> := try MUGS::Message::DataPack.new($struct<pack>);
+        try self.new: |%settable
+    }
+}
