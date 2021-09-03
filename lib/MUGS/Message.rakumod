@@ -189,7 +189,7 @@ class MUGS::Message::Response is MUGS::Message {
 
 #| An in-game push packet, not expecting a response
 class MUGS::Message::Push is MUGS::Message {
-    has Str:D    $.type           is required;
+    has Str:D $.type is required;
 
     # Convert Push objects to/from serializable structures
     method to-struct(::?CLASS:D: --> Hash) {
@@ -197,10 +197,10 @@ class MUGS::Message::Push is MUGS::Message {
     }
 
     method from-struct(::?CLASS:U: $struct) {
-        return unless $struct                 ~~ Map:D
-                   && $struct<id>             ~~ Int:D
-                   && $struct<type>           ~~ Str:D
-                   && $struct<data>           ~~ Map:D;
+        return unless $struct       ~~ Map:D
+                   && $struct<id>   ~~ Int:D
+                   && $struct<type> ~~ Str:D
+                   && $struct<data> ~~ Map:D;
 
         my %settable := hash($struct< id type data >:kv);
         try self.new: |%settable
