@@ -441,6 +441,13 @@ class MUGS::Server::Game {
         hash(:$.gamestate, :%.winloss, |$action-result);
     }
 
+    method broadcast-update-to-game(::?CLASS:D: %update) {
+        my %data := hash(:game-id($.id), |%update);
+        my $pack  = MUGS::Message::DataPack.new(%data);
+
+        .<session>.push-pack(:type<game-update>, :$pack) for self.participants;
+    }
+
     method broadcast-message-to-game(::?CLASS:D: MUGS::Character:D :$sender!,
                                      Str:D :$message!) {
         my $game-id = $.id;
@@ -806,6 +813,10 @@ class MUGS::Server::Session {
                             :%update!) {
         my %data := hash(|%update, :$game-id, :character-name($character.screen-name));
         self.push(:type<game-update>, :%data);
+    }
+
+    method push-pack(Str:D :$type!, :$pack!) {
+        $!to-client.send: MUGS::Message::PushPack.new(:$type, :$pack);
     }
 
     method push(Str:D :$type!, :%data!) {
