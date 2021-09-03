@@ -37,8 +37,9 @@ class MUGS::Client::Connection::WebSocket does MUGS::Client::Connection {
         supply whenever $!server-conn.messages -> $message {
             whenever $message.body -> $struct {
                 put "From server:\n{ to-json $struct, :sorted-keys }\n" if $!debug;
-                emit $struct<request-id> ?? MUGS::Message::Response.from-struct($struct)
-                                         !! MUGS::Message::Push.from-struct($struct)
+                emit $struct<request-id> ?? MUGS::Message::Response.from-struct($struct) !!
+                     $struct<pack>       ?? MUGS::Message::PushPack.from-struct($struct) !!
+                                            MUGS::Message::Push.from-struct($struct)
             }
         }
     }

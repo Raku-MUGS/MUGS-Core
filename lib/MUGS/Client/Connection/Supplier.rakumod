@@ -34,9 +34,10 @@ class MUGS::Client::Connection::Supplier does MUGS::Client::Connection {
         my $struct = cbor-decode $cbor;
         put "client --> CLIENT:\n{$struct.raku.indent(4)}\n" if $!debug;
 
-        $!to-client.emit: $struct<request-id>
-                          ?? MUGS::Message::Response.from-struct($struct)
-                          !! MUGS::Message::Push.from-struct($struct);
+        $!to-client.emit:
+            $struct<request-id> ?? MUGS::Message::Response.from-struct($struct) !!
+            $struct<pack>       ?? MUGS::Message::PushPack.from-struct($struct) !!
+                                   MUGS::Message::Push.from-struct($struct)
     }
 
     method send-to-server(MUGS::Message:D $message) {
