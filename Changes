@@ -22,6 +22,10 @@ Revision history for MUGS-Core
   - Update Dockerfile dependency versions
   - Update CBOR::Simple and Cro::CBOR dependency versions
 
+  [Performance]
+  - Stop sending empty WebSocket Continuation frames, approximately
+    halving frame rate on the wire
+
   [Refactoring]
   - Factor common code out of CLI tools into LocalTool
   - Factor out decode-and-connect and initial-userpass into LocalUI
