@@ -3,6 +3,7 @@
 use MUGS::Message;
 use MUGS::Connection;
 
+use Cro::WebSocket::Message;
 use Cro::WebSocket::Client;
 use Cro::CBOR;
 use JSON::Fast;
@@ -30,7 +31,8 @@ class MUGS::Client::Connection::WebSocket does MUGS::Client::Connection {
     method send-to-server(MUGS::Message:D $message) {
         my $struct = $message.to-struct;
         put "client --> SERVER:\n{ to-json $struct, :sorted-keys }\n" if $!debug;
-        $!server-conn.send($struct);
+        $!server-conn.send: Cro::WebSocket::Message.new(:!fragmented,
+                                                        :body($struct));
     }
 
     method from-server-supply() {
