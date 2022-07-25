@@ -195,13 +195,11 @@ expect-invalid { foo => [ { bar => [ 1, 2, 3 ] }, { bar => [ 5, 6e0, 7 ] } ] },
 
 
 # Packed arrays
-sub test-self-match(@types, @examples, $generic) {
+sub test-self-match(@types, @examples) {
     for @types -> $type {
         subtest "packed {(array[$type]).raku} successful matches", {
             expect-valid array[$type].new(@examples), array[$type],
                          "packed {(array[$type]).raku} matches its type object";
-            expect-valid array[$type].new(@examples), [$generic],
-                         "packed {(array[$type]).raku} matches [{$generic.^name}]";
         }
     }
 }
@@ -223,10 +221,10 @@ my @ints  = -128, -10, -4, 0, 12, 127;
 my @uints = 0, 42, 127, 255;
 my @nums  = -1e5, 5.5e-1, 42e0, Inf, -Inf, NaN;
 
-# Test that packed arrays match their type object and an array of their generic
-test-self-match(@packed-ints,  @ints,  Int);
-test-self-match(@packed-uints, @uints, UInt);
-test-self-match(@packed-nums,  @nums,  Num);
+# Test that packed arrays match their type object
+test-self-match(@packed-ints,  @ints);
+test-self-match(@packed-uints, @uints);
+test-self-match(@packed-nums,  @nums);
 
 # Make sure all combinations of int,uint,num don't match each other at 32 or 64 bits
 test-mismatch(int32,  @ints,  uint32, UInt);
