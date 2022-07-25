@@ -113,7 +113,7 @@ multi MAIN('new-ui-type', Str:D $ui-type) is export {
 
 
         # Use subcommand MAIN args
-        %PROCESS::SUB-MAIN-OPTS = :named-anywhere;
+        PROCESS::<%SUB-MAIN-OPTS> := :named-anywhere;
 
 
         #| \qq[$ui-type] app

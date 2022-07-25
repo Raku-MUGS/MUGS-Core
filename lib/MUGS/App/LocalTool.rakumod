@@ -5,7 +5,7 @@ use Terminal::ANSIColor;
 
 
 # Use subcommand MAIN args
-%PROCESS::SUB-MAIN-OPTS = :named-anywhere;
+PROCESS::<%SUB-MAIN-OPTS> := :named-anywhere;
 
 
 #| Base class for local tool programs

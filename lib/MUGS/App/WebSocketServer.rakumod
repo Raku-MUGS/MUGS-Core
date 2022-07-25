@@ -7,7 +7,7 @@ use MUGS::Server::Stub;
 
 
 # Use subcommand MAIN args
-%PROCESS::SUB-MAIN-OPTS = :named-anywhere;
+PROCESS::<%SUB-MAIN-OPTS> := :named-anywhere;
 
 
 #| Launch a WebSocket MUGS server listening on host:port
