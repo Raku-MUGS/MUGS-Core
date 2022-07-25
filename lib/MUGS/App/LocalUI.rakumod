@@ -27,10 +27,13 @@ class MUGS::App::LocalUI {
     has Bool $.is-win;
     has @.user-languages;
 
+    # MUST override in UI-specific subclasses
     method ui-type()           { ... }
     method play-current-game() { ... }
     method ensure-authenticated-session(Str $server, Str $universe) { ... }
 
+    # MAY override in UI-specific subclasses
+    method game-ui-opts() { hash() }
 
     #| Initialize the overall MUGS client app
     #  Should exit with an appropriate message if any required initialization
@@ -216,9 +219,10 @@ class MUGS::App::LocalUI {
     }
 
     #| Create and initialize a new game UI for a given game type and client
-    method launch-game-ui(Str:D :$game-type, MUGS::Client::Game:D :$client, *%ui-opts) {
+    method launch-game-ui(Str:D :$game-type, MUGS::Client::Game:D :$client) {
         my $game-ui-class = MUGS::UI.ui-class($.ui-type, $game-type);
-        my $game-ui       = $game-ui-class.new(:$client, :app-ui(self), |%ui-opts);
+        my $game-ui       = $game-ui-class.new(:$client, :app-ui(self),
+                                               |self.game-ui-opts);
 
         $game-ui.initialize;
         $game-ui
