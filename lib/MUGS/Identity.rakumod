@@ -94,6 +94,67 @@ role MUGS::Identity::NameFolding {
         $folded;
     }
 
+    #| Names that are reserved because they have special security-related
+    #| meaning outside of MUGS, and are therefore likely to be abuse attempts;
+    #| $name should be folded *before* checking reservation with this method
+    method is-reserved-name(Str:D $name --> Bool:D) {
+        # From https://ldpreload.com/blog/names-to-reserve
+        my constant $reserved = <
+            .htaccess
+            .ssh
+            .well-known
+            _tcp
+            _udp
+            abuse
+            admin
+            administrator
+            autoconfig
+            broadcasthost
+            clientaccesspolicy.xml
+            crossdomain.xml
+            favicon.ico
+            ftp
+            hostmaster
+            imap
+            info
+            is
+            isatap
+            it
+            localdomain
+            localhost
+            login
+            mail
+            mailer-daemon
+            marketing
+            mis
+            news
+            nobody
+            noc
+            noreply
+            no-reply
+            pop
+            pop3
+            postmaster
+            robots.txt
+            root
+            sales
+            security
+            smtp
+            ssladmin
+            ssladministrator
+            sslwebmaster
+            support
+            sysadmin
+            usenet
+            uucp
+            webmaster
+            wpad
+            www
+        >.Set;
+
+        $name ∈ $reserved
+    }
+
     #| Determine if a name is baseline valid (mostly PRECIS rules),
     #| before any additional restrictions based on use case
     method is-valid-name(Str:D $name, Bool:D $id = False,
@@ -155,6 +216,9 @@ role MUGS::Identity::NameFolding {
         # Reasonable length
         return False if $folded.chars > $max-chars
                      || $name.chars   > $max-chars;
+
+        # Not a reserved name
+        return False if self.is-reserved-name($folded);
 
         True;
     }
