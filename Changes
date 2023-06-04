@@ -22,7 +22,7 @@ Revision history for MUGS-Core
 
   [Packaging]
   - Update Dockerfile dependency versions
-  - Update CBOR::Simple and Cro::CBOR dependency versions
+  - Update CBOR::Simple, Cro::CBOR, and Cro::* dependency versions
   - Upload to zef/fez using mi6 UploadToZef
 
   [Performance]
