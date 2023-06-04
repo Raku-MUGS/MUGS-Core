@@ -6,12 +6,12 @@
   "build-depends": [
   ],
   "depends": [
-    "CBOR::Simple:ver<0.0.9+>",
-    "Cro::CBOR:ver<0.0.3+>",
-    "Cro::Core:ver<0.8.5+>",
-    "Cro::HTTP:ver<0.8.5+>",
-    "Cro::TLS:ver<0.8.5+>",
-    "Cro::WebSocket:ver<0.8.5+>",
+    "CBOR::Simple:auth<zef:japhb>:ver<0.1.3+>",
+    "Cro::CBOR:ver<0.0.5+>",
+    "Cro::Core:ver<0.8.9+>",
+    "Cro::HTTP:ver<0.8.9+>",
+    "Cro::TLS:ver<0.8.9+>",
+    "Cro::WebSocket:ver<0.8.9+>",
     "Crypt::SodiumPasswordHash",
     "DBIish",
     "JSON::Fast",
