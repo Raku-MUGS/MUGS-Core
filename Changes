@@ -1,6 +1,6 @@
 Revision history for MUGS-Core
 
-0.1.3  *WIP*
+{{$NEXT}}
   [Contacting us]
   - Move official IRC support channel from Freenode to Libera.Chat
 
@@ -12,15 +12,18 @@ Revision history for MUGS-Core
   - Allow for better errors from config form field validators
   - Support pre-packed Message data, for sending identical game updates to
     many clients
+  - Provide extra Game UI options from App UI
 
   [Error handling]
   - Shutdown, not just disconnect, in LocalUI.exit-with-errors
   - Exit with errors if missing requested game plugins
   - Don't crash if Supplier is disconnected before final response
+  - Work around Rakudo change in PROCESS dynamics
 
   [Packaging]
   - Update Dockerfile dependency versions
   - Update CBOR::Simple and Cro::CBOR dependency versions
+  - Upload to zef/fez using mi6 UploadToZef
 
   [Performance]
   - Stop sending empty WebSocket Continuation frames, approximately
@@ -32,12 +35,17 @@ Revision history for MUGS-Core
   - Factor out check directory exists before reading it in DevTool
   - Rename Server's broadcast-to-game to broadcast-message-to-game
 
+  [Security]
+  - Disallow security-related reserved names as identifiers
+
   [Tools]
   - Add a new-ui-type command to mugs-tool
   - Reorient mugs-tool game/genre subcommands for multi-repo world
 
   [Testing]
   - Work around YAMLish quoting change affecting File tests
+  - Stop testing dubious packed/unpacked matching behavior
+
 
 
 0.1.2  2021-05-13
