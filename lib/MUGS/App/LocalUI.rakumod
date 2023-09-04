@@ -42,8 +42,6 @@ class MUGS::App::LocalUI {
     method initialize() {
         self.gather-os-info;
         self.load-configs-or-exit;
-        self.load-client-plugins;
-        self.load-ui-plugins;
     }
 
     #| Gather OS-specific information, such as locale preferences
@@ -85,6 +83,12 @@ class MUGS::App::LocalUI {
         .message.indent(4).put for @errors;
 
         exit 1;
+    }
+
+    #| Load all relevant plugins
+    method load-plugins() {
+        self.load-client-plugins;
+        self.load-ui-plugins;
     }
 
     #| Load Client plugins
@@ -246,11 +250,17 @@ sub play-via-local-ui(MUGS::App::LocalUI:U $app-ui-class,
     #   * User config (and config defaults) loaded successfully
     #   * User's locale has been activated
 
+    # Load plugins and confirm that needed plugins exist for requested game-type
+    $app-ui.load-plugins;
+
     $app-ui.exit-with-errors("Cannot launch '$game-type'; missing client plugin.", [])
         unless MUGS::Client.implementation-exists($game-type);
 
     $app-ui.exit-with-errors("Cannot launch '$game-type'; missing UI plugin.", [])
         unless MUGS::UI.ui-exists($app-ui.ui-type, $game-type);
+
+    # INVARIANTS REQUIRED AT THIS POINT:
+    #   * All plugins required for requested game are loaded
 
     # Connect to server and authenticate as a valid user;
     # should allow player to correct errors and retry or exit

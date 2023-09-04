@@ -4,7 +4,7 @@ use MUGS::Core;
 use MUGS::Client::Game::Error;
 use MUGS::App::LocalUI;
 
-plan 28;
+plan 29;
 
 
 ### STUB UI CLASSES
@@ -54,6 +54,8 @@ nok    $app-ui.session, 'No session yet';
 lives-ok { $app-ui.initialize }, 'Able to initialize TestApp';
 ok     $app-ui.config, 'Config loaded now';
 isa-ok $app-ui.config, MUGS::Util::Config:D;
+
+lives-ok { $app-ui.load-plugins }, 'Able to load TestApp plugins';
 
 lives-ok { $app-ui.ensure-authenticated-session(Str, Str) },
          'Able to set up an authenticated session';
