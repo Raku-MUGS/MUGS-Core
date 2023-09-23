@@ -24,6 +24,17 @@ UI:
      # integrating rich semantic information that assistive technologies can
      # leverage than HTML5 does.
      tune-for-screen-reader: false
+  # Settings for CLI only (or with CLI-specific defaults)
   CLI:
      # Use ANSI attributes (bold etc.) and colors (both 16-color and 256-color)
      color: true
+     # Terminal/font symbol set to use for CLI; see mugs-cli USAGE for options
+     symbols: Uni1
+     # Whether to force-enable VT100 box drawing symbols, even for smaller symbol sets
+     vt100-boxes: false
+  # Settings for TUI only (or with TUI-specific defaults)
+  TUI:
+     # Terminal/font symbol set to use for TUI; see mugs-tui USAGE for options
+     symbols: Full
+     # Whether to force-enable VT100 box drawing symbols, even for smaller symbol sets
+     vt100-boxes: true
