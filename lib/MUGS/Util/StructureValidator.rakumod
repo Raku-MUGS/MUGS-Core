@@ -87,7 +87,7 @@ sub validate-structure($type, $data, $schema, $path = 'root') is export {
         else {
             X::MUGS::InvalidStructure.new(:$type, :path(path), :data(data),
                                           :error("must be {schema.raku}")).throw
-                unless data ~~ schema;
+                unless schema.ACCEPTS(data);
         }
     }
 
