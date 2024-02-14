@@ -558,7 +558,7 @@ class MUGS::Server::Session {
     has                            $.id = NEXT-ID;
     has MUGS::Server:D             $.server     is required;
     has MUGS::Server::Connection:D $.connection is required;
-    has MUGS::User                 $.user       is rw;
+    has MUGS::User                 $.user       is built(False);
     has Channel                    $.to-client  .= new;
 
     method start(::?CLASS:D:) {
@@ -655,6 +655,7 @@ class MUGS::Server::Session {
                 auth-error unless $user && $user ~~ MUGS::User;
 
                 $.connection.debug-name = $username;
+                $!user = $user;
 
                 self.success({}, $request.id)
             }
@@ -687,7 +688,7 @@ class MUGS::Server::Session {
                     }
                 }
 
-                return self.error(RequestError, "Cannot create user '$username'", $request.id)
+                return self.error(RequestError, "Cannot create user", $request.id)
                     unless $user && $user ~~ MUGS::User;
 
                 $.connection.debug-name = $username;
@@ -901,7 +902,7 @@ class MUGS::Server
 
         if $credentials.first(*.verify($password)) {
             MUGS::Server::LogTimelineSchema::UserAuthSuccess.log(:$username, :session-id($session.id));
-            $session.user = $!identity-store.user-by-name($username);
+            $!identity-store.user-by-name($username);
         }
         else {
             MUGS::Server::LogTimelineSchema::UserAuthFailure.log(:$username, :session-id($session.id));
