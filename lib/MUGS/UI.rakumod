@@ -36,6 +36,10 @@ class MUGS::UI::Game {
     method register() {
         MUGS::UI.register-ui(self.ui-type, self.game-type, self.WHAT);
     }
+
+    method filter-games-for-ui(@games, Bool :$all, Str:D :$ui-type = self.ui-type) {
+        $all ?? @games !! @games.grep: { MUGS::UI.ui-exists($ui-type, .<game-type>) }
+    }
 }
 
 

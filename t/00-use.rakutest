@@ -62,6 +62,8 @@ use MUGS::Client::Genre::Test;
 use MUGS::Client::Game::Echo;
 use MUGS::Client::Game::Error;
 
+use MUGS::UI::Game::Lobby;
+
 
 pass "all modules loaded successfully";
 

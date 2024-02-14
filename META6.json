@@ -65,6 +65,7 @@
     "MUGS::Server::Stub": "lib/MUGS/Server/Stub.rakumod",
     "MUGS::Server::Universe": "lib/MUGS/Server/Universe.rakumod",
     "MUGS::UI": "lib/MUGS/UI.rakumod",
+    "MUGS::UI::Game::Lobby": "lib/MUGS/UI/Game/Lobby.rakumod",
     "MUGS::Universe": "lib/MUGS/Universe.rakumod",
     "MUGS::Util::Config": "lib/MUGS/Util/Config.rakumod",
     "MUGS::Util::File": "lib/MUGS/Util/File.rakumod",
