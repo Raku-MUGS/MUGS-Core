@@ -5,6 +5,9 @@ use MUGS::Util::Config;
 
 use MUGS::Client;
 use MUGS::Client::Connection::Supplier;
+
+# Most of the precompile and load time is in the next two `use` lines.
+# I have no idea yet why they are _particularly_ worse than the others.
 use MUGS::Client::Connection::WebSocket;
 use MUGS::Client::Game::Lobby;
 
