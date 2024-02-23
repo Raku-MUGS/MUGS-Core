@@ -158,7 +158,7 @@ multi MAIN('new-ui-type', Str:D $ui-type) is export {
 
 
         #| Common options that work for all subcommands
-        my $common-args = :(Str :$server, Str :$universe, Bool :$debug);
+        my $common-args = :(Str :$server, Str :$universe, UInt :$debug);
 
         #| Add description of common arguments/options to standard USAGE
         sub GENERATE-USAGE(&main, |capture) is export {
@@ -169,7 +169,7 @@ multi MAIN('new-ui-type', Str:D $ui-type) is export {
                 Common options for all commands:
                   --server=<Str>    Specify an external server (defaults to internal)
                   --universe=<Str>  Specify a local universe (internal server only)
-                  --debug           Enable debug output
+                  --debug=<UInt>    Enable debug output and set detail level
                 OPTIONS
         }
 

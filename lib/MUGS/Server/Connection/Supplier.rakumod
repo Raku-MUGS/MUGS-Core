@@ -11,7 +11,7 @@ class MUGS::Server::Connection::Supplier does MUGS::Server::Connection {
     has $.client-conn is required;
     has $!to-server   = Supplier::Preserving.new;
     has $!from-client = $!to-server.Supply;
-    has $!debug       = ?$*DEBUG;
+    has $!debug       = $*DEBUG // 0;
 
     method disconnect() {
         put "server disconnecting ..." if $!debug;

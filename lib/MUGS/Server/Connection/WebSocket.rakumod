@@ -13,7 +13,7 @@ class MUGS::Server::Connection::WebSocket does MUGS::Server::Connection {
     has $.closed-promise is required;
     has $!to-client   = Supplier::Preserving.new;
     has $.from-server = $!to-client.Supply;
-    has $!debug       = ?$*DEBUG;
+    has $!debug       = $*DEBUG // 0;
 
     method disconnect() {
         put "server disconnecting from '$.debug-name'..." if $!debug;

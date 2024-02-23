@@ -13,7 +13,7 @@ use JSON::Fast;
 class MUGS::Client::Connection::WebSocket does MUGS::Client::Connection {
     has $!cro-client;
     has $!server-conn;
-    has $!debug = ?$*DEBUG;
+    has $!debug = $*DEBUG // 0;
 
     method connect-to-server(::?CLASS:D: :$server!, :%ca) {
         put "client connecting to '$server' ..." if $!debug;

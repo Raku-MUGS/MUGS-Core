@@ -241,10 +241,10 @@ class MUGS::App::LocalUI {
 #| Play the chosen game using either a WebSocket server or a local in-memory server
 sub play-via-local-ui(MUGS::App::LocalUI:U $app-ui-class,
                       Str:D :$game-type, GameID :$game-id, :%config,
-                      Str :$server, Str :$universe, Bool :$debug,
+                      Str :$server, Str :$universe, UInt :$debug,
                       *%ui-options) is export {
     # Set up local app UI; should exit with message on error
-    my $*DEBUG = $debug // ?%*ENV<MUGS_DEBUG>;
+    my $*DEBUG = $debug // +(%*ENV<MUGS_DEBUG> // 0);
     my $app-ui = $app-ui-class.new(|%ui-options);
     $app-ui.initialize;
 

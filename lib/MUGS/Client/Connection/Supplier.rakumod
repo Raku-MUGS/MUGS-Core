@@ -12,7 +12,7 @@ class MUGS::Client::Connection::Supplier does MUGS::Client::Connection {
     has $!server-conn;
     has $!to-client   = Supplier::Preserving.new;
     has $!from-server = $!to-client.Supply;
-    has $!debug       = ?$*DEBUG;
+    has $!debug       = $*DEBUG // 0;
 
     method connect-to-server(::?CLASS:D: :$server!) {
         put "client connecting to '$server' ..." if $!debug;

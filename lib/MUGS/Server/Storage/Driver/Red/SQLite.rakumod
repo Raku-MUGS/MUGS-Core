@@ -22,7 +22,7 @@ class Identities
     ### SETUP
 
     submethod TWEAK() {
-        $GLOBAL::RED-DEBUG //= ?$*DEBUG;
+        $GLOBAL::RED-DEBUG //= ($*DEBUG // 0) >= 3;
         self.connect-to-sqlite;
     }
 
