@@ -361,7 +361,7 @@ class MUGS::Server::Game {
     method add-event(::?CLASS:D: GameEventType:D $event-type, *%extra) {
         my $event = MUGS::Server::GameEvent.new(:$event-type, :$!game-time,
                                                 :timestamp($!prev-time), |%extra);
-        dd $event if $*DEBUG;
+        note "Game event added: {$event.raku}" if $*DEBUG;
         @!events.push($event);
 
         # GameCreated happens too early for clients to recognize the game;
