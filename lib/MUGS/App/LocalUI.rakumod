@@ -189,6 +189,7 @@ class MUGS::App::LocalUI {
     method disconnect() {
         $!session.disconnect if $!session;
         $!session = Nil;
+        $!lobby-client = Nil;
     }
 
     #| Determine an initial username and password, given decoded server info
