@@ -83,7 +83,7 @@ class MUGS::App::LocalUI {
         self.shutdown;
 
         note $intro;
-        .message.indent(4).put for @errors;
+        .message.indent(4).note for @errors;
 
         exit 1;
     }
