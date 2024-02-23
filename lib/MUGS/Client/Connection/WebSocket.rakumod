@@ -16,21 +16,21 @@ class MUGS::Client::Connection::WebSocket does MUGS::Client::Connection {
     has $!debug = $*DEBUG // 0;
 
     method connect-to-server(::?CLASS:D: :$server!, :%ca) {
-        put "client connecting to '$server' ..." if $!debug;
+        note "client connecting to '$server' ..." if $!debug;
         $!cro-client  = Cro::CBOR::WebSocket::Client.new(:uri($server), :cbor);
         $!server-conn = await $!cro-client.connect(:%ca);
-        put "client successfully connected to '$server'" if $!debug;
+        note "client successfully connected to '$server'" if $!debug;
     }
 
     method disconnect() {
-        put "client disconnecting ..." if $!debug;
+        note "client disconnecting ..." if $!debug;
         await .close with $!server-conn;
-        put "client disconnected" if $!debug;
+        note "client disconnected" if $!debug;
     }
 
     method send-to-server(MUGS::Message:D $message) {
         my $struct = $message.to-struct;
-        put "client --> SERVER:\n{ to-json $struct, :sorted-keys }\n" if $!debug;
+        note "client --> SERVER:\n{ to-json $struct, :sorted-keys }\n" if $!debug >= 2;
         $!server-conn.send: Cro::WebSocket::Message.new(:!fragmented,
                                                         :body($struct));
     }
@@ -38,7 +38,7 @@ class MUGS::Client::Connection::WebSocket does MUGS::Client::Connection {
     method from-server-supply() {
         supply whenever $!server-conn.messages -> $message {
             whenever $message.body -> $struct {
-                put "From server:\n{ to-json $struct, :sorted-keys }\n" if $!debug;
+                note "From server:\n{ to-json $struct, :sorted-keys }\n" if $!debug >= 2;
                 emit $struct<request-id> ?? MUGS::Message::Response.from-struct($struct) !!
                      $struct<pack>       ?? MUGS::Message::PushPack.from-struct($struct) !!
                                             MUGS::Message::Push.from-struct($struct)

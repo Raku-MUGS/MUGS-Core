@@ -16,19 +16,19 @@ class MUGS::Server::Connection::WebSocket does MUGS::Server::Connection {
     has $!debug       = $*DEBUG // 0;
 
     method disconnect() {
-        put "server disconnecting from '$.debug-name'..." if $!debug;
+        note "server disconnecting from '$.debug-name'..." if $!debug;
         # .close with $!client-conn;
         $!client-conn = Nil;
         $!to-client.done;
-        put "server disconnected from '$.debug-name'" if $!debug;
+        note "server disconnected from '$.debug-name'" if $!debug;
     }
 
     method send-to-client(MUGS::Message:D $message) {
-        if $!debug {
+        if $!debug >= 2 {
             my $t0     = now;
             my $struct = $message.to-struct;
 
-            put "{$t0.DateTime}] server --> CLIENT ($.debug-name):\n{ to-json $struct, :sorted-keys }\n";
+            note "{$t0.DateTime}] server --> CLIENT ($.debug-name):\n{ to-json $struct, :sorted-keys }\n";
             $!to-client.emit: Cro::WebSocket::Message.new(:!fragmented, :body($struct));
         }
         else {
@@ -40,7 +40,7 @@ class MUGS::Server::Connection::WebSocket does MUGS::Server::Connection {
     method from-client-supply() {
         supply whenever $!client-conn -> $message {
             whenever $message.body -> $struct {
-                put "From client ($.debug-name):\n{ to-json $struct, :sorted-keys }\n" if $!debug;
+                note "From client ($.debug-name):\n{ to-json $struct, :sorted-keys }\n" if $!debug >= 2;
                 emit $struct<game-id>
                     ?? MUGS::Message::Request::InGame.from-struct($struct)
                     !! MUGS::Message::Request.from-struct($struct);

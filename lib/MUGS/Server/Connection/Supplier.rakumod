@@ -14,21 +14,21 @@ class MUGS::Server::Connection::Supplier does MUGS::Server::Connection {
     has $!debug       = $*DEBUG // 0;
 
     method disconnect() {
-        put "server disconnecting ..." if $!debug;
+        note "server disconnecting ..." if $!debug;
         # .disconnect with $!client-conn;
         $!client-conn = Nil;
         $!to-server.done;
-        put "server disconnected" if $!debug;
+        note "server disconnected" if $!debug;
     }
 
     method send-to-client(MUGS::Message:D $message) {
-        put "server --> CLIENT:\n{$message.to-debug}\n" if $!debug;
+        note "server --> CLIENT:\n{$message.to-debug}\n" if $!debug >= 2;
         $!client-conn.send-to-client($message.to-cbor) if $!client-conn;
     }
 
     method send-to-server(Blob:D $cbor) {
         my $struct = cbor-decode $cbor;
-        put "server --> SERVER:\n{$struct.raku.indent(4)}\n" if $!debug;
+        note "server --> SERVER:\n{$struct.raku.indent(4)}\n" if $!debug >= 2;
 
         $!to-server.emit: $struct<game-id>
                           ?? MUGS::Message::Request::InGame.from-struct($struct)

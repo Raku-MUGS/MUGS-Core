@@ -15,24 +15,24 @@ class MUGS::Client::Connection::Supplier does MUGS::Client::Connection {
     has $!debug       = $*DEBUG // 0;
 
     method connect-to-server(::?CLASS:D: :$server!) {
-        put "client connecting to '$server' ..." if $!debug;
+        note "client connecting to '$server' ..." if $!debug;
         my $connection = MUGS::Server::Connection::Supplier.new(:client-conn(self));
         $!server-conn = $server.accept-connection(:$connection)
             or X::MUGS::Connection::Can'tConnect.new(:$server).throw;
-        put "client successfully connected to '$server'" if $!debug;
+        note "client successfully connected to '$server'" if $!debug;
     }
 
     method disconnect() {
-        put "client disconnecting ..." if $!debug;
+        note "client disconnecting ..." if $!debug;
         .disconnect with $!server-conn;
         $!server-conn = Nil;
         $!to-client.done;
-        put "client disconnected" if $!debug;
+        note "client disconnected" if $!debug;
     }
 
     method send-to-client(Blob:D $cbor) {
         my $struct = cbor-decode $cbor;
-        put "client --> CLIENT:\n{$struct.raku.indent(4)}\n" if $!debug;
+        note "client --> CLIENT:\n{$struct.raku.indent(4)}\n" if $!debug >= 2;
 
         $!to-client.emit:
             $struct<request-id> ?? MUGS::Message::Response.from-struct($struct) !!
@@ -41,7 +41,7 @@ class MUGS::Client::Connection::Supplier does MUGS::Client::Connection {
     }
 
     method send-to-server(MUGS::Message:D $message) {
-        put "client --> SERVER:\n{$message.to-debug}\n" if $!debug;
+        note "client --> SERVER:\n{$message.to-debug}\n" if $!debug >= 2;
         $!server-conn.send-to-server($message.to-cbor);
     }
 
