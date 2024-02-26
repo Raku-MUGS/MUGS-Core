@@ -38,3 +38,13 @@ UI:
      symbols: Full
      # Whether to force-enable VT100 box drawing symbols, even for smaller symbol sets
      vt100-boxes: true
+     # Whether to show menu item (and menu header) icons
+     menu-item-icons: true
+     # Whether to flash inputs when they activate
+     input-activation-flash: true
+     # Whether to show hints/descriptions for input fields
+     input-field-hints: true
+     # How to present history navigation: breadcrumbs, buttons, or both
+     history-nav: 'both-breadcrumbs-buttons'
+     # What size of menu headers to display: large, small, or none
+     menu-headers: 'large-menu-headers'
