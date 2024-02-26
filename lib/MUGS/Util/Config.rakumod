@@ -24,12 +24,15 @@ class MUGS::Util::Config {
     #| Retrieve a config value (or its default, if not set)
     method value(Str:D $section, +@keys) {
         my $config  = %!config{$section};
-        my $default = %!defaults{$section};
+           $config .= AT-KEY($_) for @keys;
+           $config // self.default($section, @keys)
+    }
 
-        $config  .= AT-KEY($_) for @keys;
-        $default .= AT-KEY($_) for @keys;
-
-        $config // $default
+    #| Retrieve a config default, ignoring user's config settings
+    method default(Str:D $section, +@keys) {
+        my $default  = %!defaults{$section};
+           $default .= AT-KEY($_) for @keys;
+           $default
     }
 
     #| (Re-)Load defaults for this config $.type, only updating if parseable
