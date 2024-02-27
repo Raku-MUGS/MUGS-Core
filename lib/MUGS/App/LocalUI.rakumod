@@ -78,6 +78,20 @@ class MUGS::App::LocalUI {
         }
     }
 
+    #| Load ui-type-specific config key (or its default, if not set),
+    #| falling back to Common defaults if no ui-type-specific default either
+    method ui-config(Str:D $key) {
+           $.config.value('UI', $.ui-type, $key)
+        // $.config.value('UI', 'Common',  $key)
+    }
+
+    #| Load ui-type-specific config default, ignoring user's config settings,
+    #| falling back to Common defaults if no ui-type-specific default exists
+    method ui-default(Str:D $key) {
+           $.config.default('UI', $.ui-type, $key)
+        // $.config.default('UI', 'Common',  $key)
+    }
+
     #| Disconnect if needed, then exit with error messages for the player
     method exit-with-errors(Str:D $intro, @errors) {
         self.shutdown;
