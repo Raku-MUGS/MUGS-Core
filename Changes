@@ -1,10 +1,35 @@
 Revision history for MUGS-Core
 
 {{$NEXT}}
+  [Bug Fixes]
+  - Tweak StructureValidator to deal with Rakudo change that broke Optional
+  - Clear LocalUI.lobby-client on disconnect
+  - Tweak CI workflow to silence GitHub Workflow warnings
+
+  [Configuration]
+  - Enable explicitly retrieving config default even if user config set
+  - Add LocalUI helper methods for ui-type-specific configs
+  - Add new config defaults for TUI optional elements
+  - Add additional config defaults for CLI and TUI to support terminal
+    capabilities overrides
+
+  [Debugging]
+  - Convert MUGS_DEBUG into a UInt, allowing tuning of debug verbosity
+  - Tune default debug verbosity levels
+  - Make sure debug messages go to $*ERR, not $*OUT
+
+  [Packaging]
+  - Update copyright year range
+
   [Refactoring]
   - Split LocalUI.load-plugins out of LocalUI.initialize to allow App UIs to
     load plugins in a visible loading screen, rather than silently before the
     UI launches
+  - Add role with common support routines for Lobby UI implementations,
+    supporting a minor refactoring of UI modules
+
+  [Security]
+  - Be a little more careful about handling user/username in Server
 
 
 0.1.3  2023-06-04T09:06:03-07:00
