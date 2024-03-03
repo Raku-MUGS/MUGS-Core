@@ -13,7 +13,6 @@
     "Cro::TLS:ver<0.8.9+>",
     "Cro::WebSocket:ver<0.8.9+>",
     "Crypt::SodiumPasswordHash",
-    "DBIish",
     "JSON::Fast",
     "Log::Timeline",
     "Pluggable",
